@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sughosh Desai</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- CURSOR GLOW -->
+  <div class="cursor-glow" id="cursorGlow"></div>
+
+  <!-- CANVAS BACKGROUND -->
+  <canvas id="grid-canvas"></canvas>
+
+  <!-- ============================================================
+       PROJECT MODAL
+  ============================================================ -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" id="modal" role="dialog" aria-modal="true">
+
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <line x1="1" y1="1" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="17" y1="1" x2="1" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="modal-header">
+        <div class="modal-tags" id="modalTags"></div>
+        <h2 class="modal-title" id="modalTitle"></h2>
+        <p class="modal-desc" id="modalDesc"></p>
+      </div>
+
+      <div class="modal-tabs">
+        <button class="modal-tab active" data-tab="video">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Video
+        </button>
+        <button class="modal-tab" data-tab="schematic">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Schematics
+        </button>
+        <button class="modal-tab" data-tab="links">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          Code & Links
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="tab-panel active" id="tab-video">
+          <div class="video-wrap">
+            <video id="modalVideo" controls playsinline>
+              <source id="modalVideoSrc" src="" type="video/mp4">
+            </video>
+          </div>
+          <p class="media-caption" id="videoCaption"></p>
+        </div>
+
+        <div class="tab-panel" id="tab-schematic">
+          <div class="schematic-wrap">
+            <img id="modalSchematic" src="" alt="Project schematic" />
+          </div>
+          <p class="media-caption" id="schematicCaption"></p>
+          <div class="extra-schematics" id="extraSchematics"></div>
+        </div>
+
+        <div class="tab-panel" id="tab-links">
+          <div class="links-panel" id="linksPanel"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TOP NAV -->
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <div class="logo">Sughosh Desai</div>
+      <div class="subtitle">Nanotechnology Engineering&nbsp;·&nbsp;University of Waterloo</div>
+    </div>
+    <nav class="nav">
+      <a href="#about"    class="nav-link">About</a>
+      <a href="#projects" class="nav-link">Projects</a>
+      <a href="#stack"    class="nav-link">Stack</a>
+      <a href="#contact"  class="nav-link">Contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">
+      <span class="dot"></span> Available for internships &nbsp;·&nbsp; Summer 2026
+    </div>
+    <h1 class="hero-h1">
+      <span class="line">Building <span class="grad">robots</span>,</span>
+      <span class="line">embedded systems,</span>
+      <span class="line">and intelligent machines.</span>
+    </h1>
+    <p class="hero-sub">
+      Nanotechnology engineer at the intersection of hardware, machine learning,
+      and autonomous systems — from micro-scale fabrication to full-stack robotics.
+    </p>
+    <div class="hero-links">
+      <a href="#projects" class="btn-primary">View Projects</a>
+      <a href="https://github.com" target="_blank" class="btn-ghost">GitHub ↗</a>
+      <a href="https://linkedin.com" target="_blank" class="btn-ghost">LinkedIn ↗</a>
+    </div>
+    <div class="scroll-hint">
+      <span>scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section id="about" class="section">
+    <div class="section-label">// about</div>
+    <h2>About</h2>
+    <p>
+      I design and build hardware and software systems focused on robotics, embedded devices,
+      and machine learning on constrained systems. I'm obsessed with making machines
+      that are actually useful in the real world — not just in simulation.
+    </p>
+    <p class="about-secondary">
+      Currently studying Nanotechnology Engineering at the University of Waterloo,
+      where I get to think about both the very small and the very large problems in engineering.
+    </p>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="section projects-section">
+    <div class="section-label">// projects</div>
+    <h2>Projects</h2>
+    <div class="projects-grid" id="projectsGrid"></div>
+  </section>
+
+  <!-- TECH STACK -->
+  <section id="stack" class="section">
+    <div class="section-label">// tech stack</div>
+    <h2>Tools &amp; Tech</h2>
+    <div class="stack-grid">
+      <div class="stack-group">
+        <div class="stack-category">Languages</div>
+        <div class="stack-items">
+          <span class="stack-item">C / C++</span>
+          <span class="stack-item">Python</span>
+          <span class="stack-item">MATLAB</span>
+          <span class="stack-item">Verilog</span>
+        </div>
+      </div>
+      <div class="stack-group">
+        <div class="stack-category">ML / AI</div>
+        <div class="stack-items">
+          <span class="stack-item">TensorFlow Lite</span>
+          <span class="stack-item">PyTorch</span>
+          <span class="stack-item">OpenCV</span>
+          <span class="stack-item">scikit-learn</span>
+        </div>
+      </div>
+      <div class="stack-group">
+        <div class="stack-category">Hardware</div>
+        <div class="stack-items">
+          <span class="stack-item">Arduino</span>
+          <span class="stack-item">Raspberry Pi</span>
+          <span class="stack-item">STM32</span>
+          <span class="stack-item">KiCad</span>
+        </div>
+      </div>
+      <div class="stack-group">
+        <div class="stack-category">Robotics</div>
+        <div class="stack-items">
+          <span class="stack-item">ROS2</span>
+          <span class="stack-item">Gazebo</span>
+          <span class="stack-item">SLAM</span>
+          <span class="stack-item">PID Control</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="section">
+    <div class="section-label">// contact</div>
+    <h2>Get in Touch</h2>
+    <p>Whether it's a project collab, internship opportunity, or just to talk robots — my inbox is open.</p>
+    <div class="contact-links">
+      <a href="mailto:yourname@email.com" class="contact-item">
+        <span class="contact-icon">✉</span>
+        <span>yourname@email.com</span>
+      </a>
+      <a href="https://linkedin.com" target="_blank" class="contact-item">
+        <span class="contact-icon">in</span>
+        <span>LinkedIn</span>
+      </a>
+      <a href="https://github.com" target="_blank" class="contact-item">
+        <span class="contact-icon">gh</span>
+        <span>GitHub</span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Sughosh Desai · 2026</span>
+    <span>Built with HTML, CSS &amp; too much caffeine</span>
+  </footer>
+
+  <script>
+
+    /* =============================================
+       PROJECT DATA — EDIT THIS
+    ============================================= */
+    const PROJECTS = [
+      {
+        id: "drum-kit",
+        title: "Arduino Drum Kit",
+        tags: ["Embedded", "Arduino", "Real-time"],
+        desc: "Real-time electronic drum system using piezo sensors and Arduino. Built custom signal conditioning circuits to handle debounce and velocity sensitivity.",
+        video: "videos/drum-kit.mp4",
+        videoCaption: "Demo of the drum kit in action.",
+        schematics: ["schematics/drum-kit-schematic.png"],
+        schematicCaption: "Piezo sensor wiring and signal conditioning circuit.",
+        github: "https://github.com/yourusername/arduino-drum-kit",
+        links: []
+      },
+      {
+        id: "trash-robot",
+        title: "Trash Collection Robot",
+        tags: ["Robotics", "Computer Vision", "Autonomous"],
+        desc: "Autonomous robot designed for object detection and collection using real-time CV pipelines. Combines navigation, actuation, and perception in a single embedded system.",
+        video: "videos/trash-robot.mp4",
+        videoCaption: "Robot autonomously detecting and collecting trash.",
+        schematics: ["schematics/trash-robot-wiring.png"],
+        schematicCaption: "Wiring diagram for motors, sensors, and controller.",
+        github: "https://github.com/yourusername/trash-robot",
+        links: []
+      },
+      {
+        id: "tinyml",
+        title: "Tiny Neural Network on Arduino",
+        tags: ["TinyML", "Neural Networks", "Optimization"],
+        desc: "Optimized ML inference on constrained microcontroller hardware. Quantized and pruned a neural network to run on <2KB of RAM without sacrificing accuracy.",
+        video: "videos/tinyml.mp4",
+        videoCaption: "Live inference running on Arduino hardware.",
+        schematics: ["schematics/tinyml-setup.png"],
+        schematicCaption: "Hardware setup and pin connections for inference demo.",
+        github: "https://github.com/yourusername/tinyml-arduino",
+        links: []
+      }
+    ];
+
+    /* =============================================
+       BUILD PROJECT CARDS
+    ============================================= */
+    const grid = document.getElementById('projectsGrid');
+
+    PROJECTS.forEach((proj, i) => {
+      const card = document.createElement('div');
+      card.className = 'project-card';
+      card.setAttribute('data-id', proj.id);
+
+      const tagsHTML = proj.tags.map((t, ti) =>
+        `<span class="tag${ti === 0 ? ' accent' : ''}">${t}</span>`
+      ).join('');
+
+      card.innerHTML = `
+        <div class="project-header">
+          <span class="project-number">0${i + 1}</span>
+          <div class="project-tags">${tagsHTML}</div>
+        </div>
+        <h3>${proj.title}</h3>
+        <p>${proj.desc}</p>
+        <span class="project-link">View project →</span>
+        <div class="card-glow"></div>
+      `;
+
+      card.addEventListener('click', () => openModal(proj.id));
+      grid.appendChild(card);
+    });
+
+    /* =============================================
+       MODAL
+    ============================================= */
+    const backdrop      = document.getElementById('modalBackdrop');
+    const closeBtn      = document.getElementById('modalClose');
+    const modalTitle    = document.getElementById('modalTitle');
+    const modalDesc     = document.getElementById('modalDesc');
+    const modalTags     = document.getElementById('modalTags');
+    const modalVideo    = document.getElementById('modalVideo');
+    const modalVideoSrc = document.getElementById('modalVideoSrc');
+    const videoCapEl    = document.getElementById('videoCaption');
+    const modalSchematic= document.getElementById('modalSchematic');
+    const schCapEl      = document.getElementById('schematicCaption');
+    const extraSch      = document.getElementById('extraSchematics');
+    const linksPanel    = document.getElementById('linksPanel');
+    const tabs          = document.querySelectorAll('.modal-tab');
+    const panels        = document.querySelectorAll('.tab-panel');
+
+    function openModal(id) {
+      const proj = PROJECTS.find(p => p.id === id);
+      if (!proj) return;
+
+      modalTitle.textContent = proj.title;
+      modalDesc.textContent  = proj.desc;
+      modalTags.innerHTML = proj.tags.map((t, i) =>
+        `<span class="tag${i === 0 ? ' accent' : ''}">${t}</span>`
+      ).join('');
+
+      // video
+      modalVideoSrc.src = proj.video || '';
+      modalVideo.load();
+      videoCapEl.textContent = proj.videoCaption || '';
+
+      // schematics
+      if (proj.schematics && proj.schematics.length > 0) {
+        modalSchematic.src = proj.schematics[0];
+        schCapEl.textContent = proj.schematicCaption || '';
+        extraSch.innerHTML = '';
+        proj.schematics.slice(1).forEach(src => {
+          const img = document.createElement('img');
+          img.src = src; img.className = 'extra-schematic-img';
+          extraSch.appendChild(img);
+        });
+      }
+
+      // links
+      linksPanel.innerHTML = '';
+      if (proj.github) {
+        linksPanel.innerHTML += `
+          <a href="${proj.github}" target="_blank" class="link-item">
+            <div class="link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
+            <div class="link-text"><span class="link-label">GitHub Repository</span><span class="link-url">${proj.github.replace('https://','')}</span></div>
+            <span class="link-arrow">↗</span>
+          </a>`;
+      }
+      proj.links.forEach(l => {
+        linksPanel.innerHTML += `
+          <a href="${l.url}" target="_blank" class="link-item">
+            <div class="link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
+            <div class="link-text"><span class="link-label">${l.label}</span></div>
+            <span class="link-arrow">↗</span>
+          </a>`;
+      });
+      if (!proj.github && proj.links.length === 0) {
+        linksPanel.innerHTML = `<p class="no-links">No links yet — check back soon.</p>`;
+      }
+
+      // reset tabs
+      tabs.forEach(t => t.classList.remove('active'));
+      panels.forEach(p => p.classList.remove('active'));
+      tabs[0].classList.add('active');
+      panels[0].classList.add('active');
+
+      backdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      backdrop.classList.remove('open');
+      document.body.style.overflow = '';
+      modalVideo.pause();
+      modalVideo.currentTime = 0;
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        panels.forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+      });
+    });
+
+    /* =============================================
+       CURSOR GLOW
+    ============================================= */
+    const glowEl = document.getElementById('cursorGlow');
+    let mx = -300, my = -300, cx = -300, cy = -300;
+    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function lerpGlow() {
+      cx += (mx - cx) * 0.09;
+      cy += (my - cy) * 0.09;
+      glowEl.style.transform = `translate(${cx - 200}px, ${cy - 200}px)`;
+      requestAnimationFrame(lerpGlow);
+    })();
+
+    /* =============================================
+       DOT GRID CANVAS
+    ============================================= */
+    const canvas = document.getElementById('grid-canvas');
+    const ctx    = canvas.getContext('2d');
+    let W, H, dots = [];
+
+    function resize() {
+      W = canvas.width  = window.innerWidth;
+      H = canvas.height = document.body.scrollHeight;
+    }
+    function buildDots() {
+      dots = [];
+      const s = 40;
+      for (let x = 0; x < W + s; x += s)
+        for (let y = 0; y < H + s; y += s)
+          dots.push({ ox: x, oy: y, phase: Math.random() * Math.PI * 2 });
+    }
+
+    let mouse = { x: -999, y: -999 };
+    window.addEventListener('mousemove', e => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY + window.scrollY;
+    });
+
+    let t = 0;
+    (function drawDots() {
+      ctx.clearRect(0, 0, W, H);
+      t += 0.010;
+      for (const d of dots) {
+        const dist = Math.hypot(d.ox - mouse.x, d.oy - mouse.y);
+        const pull = Math.max(0, 1 - dist / 200);
+        const wave = Math.sin(t + d.phase) * 1.1;
+        const px   = d.ox + (mouse.x - d.ox) * pull * 0.16 + wave;
+        const py   = d.oy + (mouse.y - d.oy) * pull * 0.16 + wave;
+        const a    = 0.07 + pull * 0.32 + Math.abs(wave) * 0.03;
+        const r    = 1.1  + pull * 2.4;
+        const hue  = 222  + pull * 75;
+        ctx.beginPath();
+        ctx.arc(px, py, r, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${hue},88%,72%,${a})`;
+        ctx.fill();
+      }
+      requestAnimationFrame(drawDots);
+    })();
+
+    resize(); buildDots();
+    window.addEventListener('resize', () => { resize(); buildDots(); });
+
+    /* =============================================
+       SCROLL REVEAL
+    ============================================= */
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
+
+    /* =============================================
+       NAV SHRINK + ACTIVE
+    ============================================= */
+    const topbar   = document.getElementById('topbar');
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    window.addEventListener('scroll', () => {
+      topbar.classList.toggle('scrolled', window.scrollY > 60);
+      let current = '';
+      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${current}`));
+    }, { passive: true });
+
+    /* =============================================
+       CARD SPOTLIGHT
+    ============================================= */
+    document.addEventListener('mousemove', e => {
+      document.querySelectorAll('.project-card').forEach(card => {
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+      });
+    });
+
+    /* =============================================
+       SMOOTH SCROLL
+    ============================================= */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+
+  </script>
+</body>
+</html>
