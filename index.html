@@ -103,8 +103,7 @@
       <span class="line">and intelligent machines.</span>
     </h1>
     <p class="hero-sub">
-      Nanotechnology engineer at the intersection of hardware, machine learning,
-      and autonomous systems — from micro-scale fabrication to full-stack robotics.
+      
     </p>
     <div class="hero-links">
       <a href="#projects" class="btn-primary">View Projects</a>
@@ -222,8 +221,8 @@
         desc: "Real-time electronic drum system using piezo sensors and Arduino. Built custom signal conditioning circuits to handle debounce and velocity sensitivity.",
         video: "videos/drum-kit.mp4",
         videoCaption: "Demo of the drum kit in action.",
-        schematics: ["schematics/drum-kit-schematic.png"],
-        schematicCaption: "Piezo sensor wiring and signal conditioning circuit.",
+        schematics: [],
+        schematicCaption: "",
         github: "https://github.com/yourusername/arduino-drum-kit",
         links: []
       },
@@ -246,8 +245,8 @@
         desc: "Optimized ML inference on constrained microcontroller hardware. Quantized and pruned a neural network to run on <2KB of RAM without sacrificing accuracy.",
         video: "videos/tinyml.mp4",
         videoCaption: "Live inference running on Arduino hardware.",
-        schematics: ["schematics/tinyml-setup.png"],
-        schematicCaption: "Hardware setup and pin connections for inference demo.",
+        schematics: [],
+        schematicCaption: "",
         github: "https://github.com/yourusername/tinyml-arduino",
         links: []
       }
@@ -315,7 +314,8 @@
       modalVideo.load();
       videoCapEl.textContent = proj.videoCaption || '';
 
-      // schematics
+      // schematics — show/hide tab based on content
+      const schTab = document.querySelector('.modal-tab[data-tab="schematic"]');
       if (proj.schematics && proj.schematics.length > 0) {
         modalSchematic.src = proj.schematics[0];
         schCapEl.textContent = proj.schematicCaption || '';
@@ -325,6 +325,9 @@
           img.src = src; img.className = 'extra-schematic-img';
           extraSch.appendChild(img);
         });
+        schTab.style.display = '';
+      } else {
+        schTab.style.display = 'none';
       }
 
       // links
