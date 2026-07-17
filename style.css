@@ -617,27 +617,3 @@ header, section, footer {
   .modal-tab { padding: 12px 14px; font-size: 12px; }
   .modal-body { padding: 20px 22px 28px; }
 }
-
-/* =========================
-   RESUME NAV BUTTON
-========================= */
-.nav-resume {
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  color: #fff;
-  text-decoration: none;
-  padding: 8px 18px;
-  border-radius: 7px;
-  background: linear-gradient(110deg, var(--blue), var(--pink));
-  transition: opacity 0.2s, transform 0.2s;
-}
-
-.nav-resume:hover {
-  opacity: 0.85;
-  transform: translateY(-1px);
-}
-
-@media (max-width: 768px) {
-  .nav-resume { padding: 6px 14px; font-size: 12px; }
-}
