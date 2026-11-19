@@ -2,435 +2,96 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sughosh Desai</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sughosh Desai — Robotics & Embedded Systems</title>
+  <meta name="description" content="Sughosh Desai — Nanotechnology Engineering at the University of Waterloo. Robots, embedded systems and TinyML." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect x='5' y='8' width='22' height='17' rx='5' fill='%23f4ede2' stroke='%232a2f36' stroke-width='2'/><rect x='10' y='13' width='3' height='6' rx='1.5' fill='%2337c3b2'/><rect x='19' y='13' width='3' height='6' rx='1.5' fill='%2337c3b2'/><line x1='16' y1='8' x2='16' y2='3' stroke='%232a2f36' stroke-width='2'/><circle cx='16' cy='3' r='2' fill='%23ff7a3d'/></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
 </head>
-
 <body>
 
-  <div class="cursor-glow" id="cursorGlow"></div>
-
-  <canvas id="grid-canvas"></canvas>
-
-  <!-- project modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal" id="modal" role="dialog" aria-modal="true">
-
-      <button class="modal-close" id="modalClose" aria-label="Close">
-        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-          <line x1="1" y1="1" x2="17" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <line x1="17" y1="1" x2="1" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-
-      <div class="modal-header">
-        <div class="modal-tags" id="modalTags"></div>
-        <h2 class="modal-title" id="modalTitle"></h2>
-        <p class="modal-desc" id="modalDesc"></p>
-      </div>
-
-      <div class="modal-tabs">
-        <button class="modal-tab active" data-tab="video">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-          Video
-        </button>
-        <button class="modal-tab" data-tab="schematic">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Schematics
-        </button>
-        <button class="modal-tab" data-tab="links">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-          Code & Links
-        </button>
-      </div>
-
-      <div class="modal-body">
-        <div class="tab-panel active" id="tab-video">
-          <div class="video-wrap">
-            <video id="modalVideo" controls playsinline>
-              <source id="modalVideoSrc" src="" type="video/mp4">
-            </video>
-          </div>
-          <p class="media-caption" id="videoCaption"></p>
-        </div>
-
-        <div class="tab-panel" id="tab-schematic">
-          <div class="schematic-wrap">
-            <img id="modalSchematic" src="" alt="Project schematic" />
-          </div>
-          <p class="media-caption" id="schematicCaption"></p>
-          <div class="extra-schematics" id="extraSchematics"></div>
-        </div>
-
-        <div class="tab-panel" id="tab-links">
-          <div class="links-panel" id="linksPanel"></div>
-        </div>
-      </div>
-
+  <!-- boot screen -->
+  <div id="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <div class="boot-lines" id="bootLines"></div>
+      <div class="boot-bar"><span id="bootBar"></span></div>
+      <button class="boot-skip" id="bootSkip">skip ›</button>
     </div>
   </div>
 
-  <header class="topbar" id="topbar">
-    <div class="brand">
-      <div class="logo">Sughosh Desai</div>
-      <div class="subtitle">Nanotechnology Engineering&nbsp;·&nbsp;University of Waterloo</div>
+  <!-- 3D scene -->
+  <div id="scene" aria-label="Interactive 3D robotics workshop"></div>
+
+  <!-- HUD -->
+  <header class="hud-top">
+    <div class="hud-name">
+      <h1>SUGHOSH DESAI</h1>
+      <p>Nanotechnology Engineering · University of Waterloo</p>
     </div>
-    <nav class="nav">
-      <a href="#about"    class="nav-link">About</a>
-      <a href="#projects" class="nav-link">Projects</a>
-      <a href="#stack"    class="nav-link">Stack</a>
-      <a href="#contact"  class="nav-link">Contact</a>
-      <a href="resume.pdf" target="_blank" class="nav-resume">Resume</a>
-    </nav>
+    <div class="hud-actions">
+      <button class="chip" id="toStandard" title="Plain scrollable version">☰ Standard view</button>
+      <a class="chip chip-accent" id="resumeTop" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+    </div>
   </header>
 
-  <section class="hero">
-    <h1 class="hero-h1">
-      <span class="line">Building <span class="grad">robots</span>,</span>
-      <span class="line"> and embedded systems.</span>
-    </h1>
-    
-    <div class="hero-links">
-      <a href="#projects" class="btn-primary">View Projects</a>
-      <a href="https://github.com/mayonike52" target="_blank" class="btn-ghost">GitHub ↗</a>
-      <a href="https://www.linkedin.com/in/sughosh-desai-6a04b528a" target="_blank" class="btn-ghost">LinkedIn ↗</a>
+  <nav class="hud-bottom" aria-label="Workshop sections">
+    <p class="hud-hint" id="hint">Click <b>SD-01</b> (the droid) to say hi, or explore the workshop</p>
+    <div class="quicknav">
+      <button data-go="about">About</button>
+      <button data-go="projects">Projects</button>
+      <button data-go="skills">Skills</button>
+      <button data-go="contact">Contact</button>
     </div>
-    <div class="scroll-hint">
-      <span>scroll</span>
-      <div class="scroll-line"></div>
-    </div>
-  </section>
+  </nav>
 
-  <section id="about" class="section">
-    <div class="section-label">// about</div>
-    <h2>About</h2>
-    <p>
-      I design and build hardware and software systems focused on robotics and embedded devices. 
-      I enjoy making and prototyping machines that are both useful in real life and push my limits.
-    </p>
-    <p class="about-secondary">
-      I am currently studying Nanotechnology Engineering at the University of Waterloo,
-      where I get to think about the very, very small problems in engineering.
-    </p>
-  </section>
+  <div id="tooltip" role="status"></div>
+  <div id="bubble"></div>
+  <div id="toast"></div>
 
-  <section id="projects" class="section projects-section">
-    <div class="section-label">// projects</div>
-    <h2>Projects</h2>
-    <div class="projects-grid" id="projectsGrid"></div>
-  </section>
+  <!-- side panel -->
+  <aside id="panel" aria-hidden="true">
+    <button class="panel-back" id="panelClose">← Back to workshop</button>
+    <div class="panel-body" id="panelBody"></div>
+  </aside>
 
-  <section id="stack" class="section">
-    <div class="section-label">// tech stack</div>
-    <h2>Skills</h2>
-    <div class="stack-grid">
-      <div class="stack-group">
-        <div class="stack-category">Languages</div>
-        <div class="stack-items">
-          <span class="stack-item">C++</span>
-          <span class="stack-item">Python</span>
-          <span class="stack-item">MATLAB</span>
-        </div>
+  <!-- project modal -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-head">
+        <div class="tags" id="modalTags"></div>
+        <h2 id="modalTitle"></h2>
+        <p id="modalDesc"></p>
       </div>
-      <div class="stack-group">
-        <div class="stack-category">ML / AI</div>
-        <div class="stack-items">
-          <span class="stack-item">MediaPipe</span>
-          <span class="stack-item">OpenCV</span>
-        </div>
-      </div>
-      <div class="stack-group">
-        <div class="stack-category">Hardware</div>
-        <div class="stack-items">
-          <span class="stack-item">Arduino</span>
-          <span class="stack-item">Raspberry Pi</span>
-        </div>
-      </div>
+      <div class="modal-tabs" id="modalTabs"></div>
+      <div class="modal-content" id="modalContent"></div>
     </div>
-  </section>
+  </div>
 
-  <section id="contact" class="section">
-    <div class="section-label">// contact</div>
-    <h2>Get in Touch</h2>
-    <p>Feel free to reach out about projects, opportunities, or anything robotics related.</p>
-    <div class="contact-links">
-      <a href="mailto:s55desai@uwaterloo.ca" class="contact-item">
-        <span class="contact-icon">✉</span>
-        <span>s55desai@uwaterloo.ca</span>
-      </a>
-      <a href="https://www.linkedin.com/in/sughosh-desai-6a04b528a" target="_blank" class="contact-item">
-        <span class="contact-icon">in</span>
-        <span>LinkedIn</span>
-      </a>
-      <a href="https://github.com/mayonike52" target="_blank" class="contact-item">
-        <span class="contact-icon">gh</span>
-        <span>GitHub</span>
-      </a>
+  <!-- standard (non-3D) view -->
+  <main id="standard" aria-hidden="true">
+    <div class="std-bar">
+      <span class="std-logo">SUGHOSH DESAI</span>
+      <nav>
+        <a href="#s-about">About</a><a href="#s-projects">Projects</a><a href="#s-skills">Skills</a><a href="#s-contact">Contact</a>
+        <a href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+      </nav>
+      <button class="chip chip-accent" id="to3d">◆ Enter 3D workshop</button>
     </div>
-  </section>
+    <div class="std-wrap" id="stdContent"></div>
+  </main>
 
-  <footer class="footer">
-    <span>Sughosh Desai · 2026</span>
-    <span>Built with HTML and CSS</span>
-  </footer>
+  <noscript><style>#boot{display:none}</style><p style="padding:2rem;font-family:sans-serif">This site needs JavaScript. Email: s55desai@uwaterloo.ca · github.com/mayonike52</p></noscript>
 
-  <script>
-
-    // edit project info here
-    const PROJECTS = [
-      {
-        id: "tinyml",
-        title: "Optimized Neural Network on Arduino UNO",
-        tags: ["TinyML", "Neural Networks", "Optimization"],
-        desc: "Optimized a neural network to work on <2KB of RAM on a Arduino microcontroller.",
-        video: "videos/tinyml.mp4",
-        videoCaption: "Network running on Arduino hardware.",
-        schematics: [],
-        schematicCaption: "",
-        github: "https://github.com/mayonike52/Optimized-Neural-Network-on-Arduino-UNO",
-        links: []
-      },
-      {
-        id: "trash-robot",
-        title: "Trash Collection Robot",
-        tags: ["Robotics", "Computer Vision", "Autonomous"],
-        desc: "Semi-autonomous robot designed using Arduino with obstacle avoidance and a built in robotic arm that can pick up trash. Controlled via phone with using bluetooth module.",
-        video: "videos/trash-robot.mp4",
-        videoCaption: "",
-        schematics: ["schematics/trash-robot-wiring.jpg"],
-        schematicCaption: "Wiring diagram for motors, sensors, and controller.",
-        github: "https://github.com/mayonike52/Trash-Collection-Robot",
-        links: []
-      }
-      
-    ];
-
-    // build project cards from the data above
-    const grid = document.getElementById('projectsGrid');
-
-    PROJECTS.forEach((proj, i) => {
-      const card = document.createElement('div');
-      card.className = 'project-card';
-      card.setAttribute('data-id', proj.id);
-
-      const tagsHTML = proj.tags.map((t, ti) =>
-        `<span class="tag${ti === 0 ? ' accent' : ''}">${t}</span>`
-      ).join('');
-
-      card.innerHTML = `
-        <div class="project-header">
-          <span class="project-number">0${i + 1}</span>
-          <div class="project-tags">${tagsHTML}</div>
-        </div>
-        <h3>${proj.title}</h3>
-        <p>${proj.desc}</p>
-        <span class="project-link">View project →</span>
-        <div class="card-glow"></div>
-      `;
-
-      card.addEventListener('click', () => openModal(proj.id));
-      grid.appendChild(card);
-    });
-
-    // modal logic
-    const backdrop      = document.getElementById('modalBackdrop');
-    const closeBtn      = document.getElementById('modalClose');
-    const modalTitle    = document.getElementById('modalTitle');
-    const modalDesc     = document.getElementById('modalDesc');
-    const modalTags     = document.getElementById('modalTags');
-    const modalVideo    = document.getElementById('modalVideo');
-    const modalVideoSrc = document.getElementById('modalVideoSrc');
-    const videoCapEl    = document.getElementById('videoCaption');
-    const modalSchematic= document.getElementById('modalSchematic');
-    const schCapEl      = document.getElementById('schematicCaption');
-    const extraSch      = document.getElementById('extraSchematics');
-    const linksPanel    = document.getElementById('linksPanel');
-    const tabs          = document.querySelectorAll('.modal-tab');
-    const panels        = document.querySelectorAll('.tab-panel');
-
-    function openModal(id) {
-      const proj = PROJECTS.find(p => p.id === id);
-      if (!proj) return;
-
-      modalTitle.textContent = proj.title;
-      modalDesc.textContent  = proj.desc;
-      modalTags.innerHTML = proj.tags.map((t, i) =>
-        `<span class="tag${i === 0 ? ' accent' : ''}">${t}</span>`
-      ).join('');
-
-      modalVideoSrc.src = proj.video || '';
-      modalVideo.load();
-      videoCapEl.textContent = proj.videoCaption || '';
-
-      const schTab = document.querySelector('.modal-tab[data-tab="schematic"]');
-      if (proj.schematics && proj.schematics.length > 0) {
-        modalSchematic.src = proj.schematics[0];
-        schCapEl.textContent = proj.schematicCaption || '';
-        extraSch.innerHTML = '';
-        proj.schematics.slice(1).forEach(src => {
-          const img = document.createElement('img');
-          img.src = src; img.className = 'extra-schematic-img';
-          extraSch.appendChild(img);
-        });
-        schTab.style.display = '';
-      } else {
-        schTab.style.display = 'none';
-      }
-
-      linksPanel.innerHTML = '';
-      if (proj.github) {
-        linksPanel.innerHTML += `
-          <a href="${proj.github}" target="_blank" class="link-item">
-            <div class="link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
-            <div class="link-text"><span class="link-label">GitHub Repository</span><span class="link-url">${proj.github.replace('https://','')}</span></div>
-            <span class="link-arrow">↗</span>
-          </a>`;
-      }
-      proj.links.forEach(l => {
-        linksPanel.innerHTML += `
-          <a href="${l.url}" target="_blank" class="link-item">
-            <div class="link-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></div>
-            <div class="link-text"><span class="link-label">${l.label}</span></div>
-            <span class="link-arrow">↗</span>
-          </a>`;
-      });
-      if (!proj.github && proj.links.length === 0) {
-        linksPanel.innerHTML = `<p class="no-links">No links yet — check back soon.</p>`;
-      }
-
-      tabs.forEach(t => t.classList.remove('active'));
-      panels.forEach(p => p.classList.remove('active'));
-      tabs[0].classList.add('active');
-      panels[0].classList.add('active');
-
-      backdrop.classList.add('open');
-      document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-      backdrop.classList.remove('open');
-      document.body.style.overflow = '';
-      modalVideo.pause();
-      modalVideo.currentTime = 0;
-    }
-
-    closeBtn.addEventListener('click', closeModal);
-    backdrop.addEventListener('click', e => { if (e.target === backdrop) closeModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        panels.forEach(p => p.classList.remove('active'));
-        tab.classList.add('active');
-        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-      });
-    });
-
-    // cursor glow
-    const glowEl = document.getElementById('cursorGlow');
-    let mx = -300, my = -300, cx = -300, cy = -300;
-    window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-    (function lerpGlow() {
-      cx += (mx - cx) * 0.09;
-      cy += (my - cy) * 0.09;
-      glowEl.style.transform = `translate(${cx - 200}px, ${cy - 200}px)`;
-      requestAnimationFrame(lerpGlow);
-    })();
-
-    // dot grid background
-    const canvas = document.getElementById('grid-canvas');
-    const ctx    = canvas.getContext('2d');
-    let W, H, dots = [];
-
-    function resize() {
-      W = canvas.width  = window.innerWidth;
-      H = canvas.height = document.body.scrollHeight;
-    }
-    function buildDots() {
-      dots = [];
-      const s = 40;
-      for (let x = 0; x < W + s; x += s)
-        for (let y = 0; y < H + s; y += s)
-          dots.push({ ox: x, oy: y, phase: Math.random() * Math.PI * 2 });
-    }
-
-    let mouse = { x: -999, y: -999 };
-    window.addEventListener('mousemove', e => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY + window.scrollY;
-    });
-
-    let t = 0;
-    (function drawDots() {
-      ctx.clearRect(0, 0, W, H);
-      t += 0.010;
-      for (const d of dots) {
-        const dist = Math.hypot(d.ox - mouse.x, d.oy - mouse.y);
-        const pull = Math.max(0, 1 - dist / 200);
-        const wave = Math.sin(t + d.phase) * 1.1;
-        const px   = d.ox + (mouse.x - d.ox) * pull * 0.16 + wave;
-        const py   = d.oy + (mouse.y - d.oy) * pull * 0.16 + wave;
-        const a    = 0.07 + pull * 0.32 + Math.abs(wave) * 0.03;
-        const r    = 1.1  + pull * 2.4;
-        const hue  = 222  + pull * 75;
-        ctx.beginPath();
-        ctx.arc(px, py, r, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${hue},88%,72%,${a})`;
-        ctx.fill();
-      }
-      requestAnimationFrame(drawDots);
-    })();
-
-    resize(); buildDots();
-    window.addEventListener('resize', () => { resize(); buildDots(); });
-
-    // fade in sections as you scroll
-    const revealObserver = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-          revealObserver.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
-
-    // shrink nav on scroll + highlight active section
-    const topbar   = document.getElementById('topbar');
-    const sections = document.querySelectorAll('section[id]');
-    const navLinks = document.querySelectorAll('.nav-link');
-
-    window.addEventListener('scroll', () => {
-      topbar.classList.toggle('scrolled', window.scrollY > 60);
-      let current = '';
-      sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
-      navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${current}`));
-    }, { passive: true });
-
-    // spotlight effect on project cards
-    document.addEventListener('mousemove', e => {
-      document.querySelectorAll('.project-card').forEach(card => {
-        const rect = card.getBoundingClientRect();
-        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
-        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
-      });
-    });
-
-    // smooth scroll for nav links
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const target = document.querySelector(a.getAttribute('href'));
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    });
-
-  </script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
