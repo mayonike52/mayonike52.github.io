@@ -17,22 +17,7 @@ export const PROFILE = {
 };
 
 // status: "complete" | "in-progress"
-// To add the battle bot later: fill in its video / schematics / github and
-// change status to "complete".
 export const PROJECTS = [
-  {
-    id: "battlebot",
-    title: "Battle Bot",
-    status: "in-progress",
-    tags: ["Combat Robotics", "Mechanical Design", "Motor Control"],
-    desc: "A combat robot currently being designed and built. Build log, CAD and fight footage coming soon.",
-    video: "",
-    videoCaption: "",
-    schematics: [],
-    schematicCaption: "",
-    github: "",
-    links: []
-  },
   {
     id: "trash-robot",
     title: "Trash Collection Robot",
@@ -51,7 +36,7 @@ export const PROJECTS = [
     title: "Optimized Neural Network on Arduino UNO",
     status: "complete",
     tags: ["TinyML", "Neural Networks", "Optimization"],
-    desc: "Optimized a neural network to run in under 2 KB of RAM on an Arduino UNO microcontroller.",
+    desc: "Trained a 2-4-3 neural network in Python to classify ambient light into three categories from two LDR sensors, then deployed the optimized weights in embedded C for real-time inference within the Arduino UNO's 2 KB of RAM.",
     video: "videos/tinyml.mp4",
     videoCaption: "Network running on Arduino hardware.",
     schematics: [],
@@ -62,7 +47,39 @@ export const PROJECTS = [
 ];
 
 export const SKILLS = [
-  { group: "Languages", items: ["C++", "Python", "MATLAB"] },
-  { group: "ML / AI",   items: ["MediaPipe", "OpenCV"] },
-  { group: "Hardware",  items: ["Arduino", "Raspberry Pi"] }
+  { group: "Languages & Software", items: ["Embedded C / Arduino", "Python", "Pandas", "NumPy", "OpenCV", "MediaPipe"] },
+  { group: "CAD",                  items: ["SOLIDWORKS"] },
+  { group: "Hardware & Electrical", items: ["PCB Assembly & Testing", "Circuit Debugging", "Sensor Integration", "Microcontrollers", "Soldering"] }
 ];
+
+// ── Combat robotics section ──────────────────────────────────
+export const COMBAT = {
+  robot: "Bitflip",
+  team: "WATBOT Design Team",
+  role: "Design Team Engineer",
+  dates: "Sept. 2026 – Present",
+  summary: "Bitflip is our team's vertical-spinner combat robot. It finished 4th at the WATBOTS 2026 tournament. I work on its mechanical design: the spinner weapon and the motor-shaft mounts that hold it, modelled in SOLIDWORKS.",
+  stats: [
+    { k: "Result",  v: "4th place · Semifinalist", sub: "WATBOTS Combat Robotics Tournament 2026" },
+    { k: "Weapon",  v: "Vertical spinner" },
+    { k: "My role", v: "Weapon & mount design" },
+    { k: "CAD",     v: "SOLIDWORKS" }
+  ],
+  numbers: [
+    { n: "3",       unit: "",  label: "design iterations of the weapon and motor-shaft mounts" },
+    { n: "−1.21",   unit: "g", label: "removed from the spinner by redesigning its geometry" },
+    { n: "(0,0,0)", unit: "",  label: "centre of mass balanced at the origin, without hurting durability" },
+    { n: "1",       unit: "cm", label: "clearance kept between the weapon tip and the floor" }
+  ],
+  contributions: [
+    "Iterated on 3 designs of the weapon and motor-shaft mounts so the mount contacts the floor for added traction and stability, while keeping a 1 cm clearance from the weapon tip to the ground.",
+    "Redesigned the vertical spinner's geometry in SOLIDWORKS, cutting 1.21 g to balance the centre of mass at (0, 0, 0) without impacting durability."
+  ],
+  video: { src: "videos/bitflip-vs-batmobile.mp4", poster: "images/bitflip/fight-poster.jpg", title: "Bitflip vs. Batmobile", caption: "Tournament fight. Bitflip is the black bot." },
+  photo: "images/bitflip/bitflip-photo.jpg",
+  gallery: [
+    { src: "images/bitflip/cad-assembly.png", title: "Full assembly", caption: "Chassis, forks and spinner in SOLIDWORKS." },
+    { src: "images/bitflip/cad-weapon.png",   title: "Spinner weapon", caption: "Redesigned geometry: −1.21 g, COM at the origin." },
+    { src: "images/bitflip/cad-mount.png",    title: "Motor-shaft mount", caption: "One of 3 mount iterations; it touches the floor for traction." }
+  ]
+};

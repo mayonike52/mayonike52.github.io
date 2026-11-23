@@ -1,4 +1,4 @@
-import { PROFILE, PROJECTS, SKILLS } from "./data.js";
+import { PROFILE, PROJECTS, SKILLS, COMBAT } from "./data.js";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -41,9 +41,9 @@ const PANELS = {
       <div><dt>Base</dt><dd>University of Waterloo</dd></div>
       <div><dt>Program</dt><dd>Nanotechnology Engineering</dd></div>
       <div><dt>Focus</dt><dd>Robotics · Embedded · TinyML</dd></div>
-      <div><dt>Current build</dt><dd>Battle bot</dd></div>
+      <div><dt>Design team</dt><dd>WATBOT · Bitflip</dd></div>
     </dl>
-    <div class="row-btns"><button class="btn" data-go="projects">See projects</button><a class="btn ghost" href="${PROFILE.resume}" target="_blank" rel="noopener">Resume ↗</a></div>`,
+    <div class="row-btns"><button class="btn" data-go="combat">Combat robotics</button><button class="btn ghost" data-go="projects">Projects</button><a class="btn ghost" href="${PROFILE.resume}" target="_blank" rel="noopener">Resume ↗</a></div>`,
   projects: () => `<div class="label">// mission logs</div><h2>Projects</h2>${projectCards()}`,
   skills: () => `<div class="label">// installed modules</div><h2>Skills</h2>${skillsHTML()}`,
   contact: () => `<div class="label">// comm channel open</div><h2>Get in touch</h2>
@@ -52,6 +52,137 @@ const PANELS = {
     <p>The full rundown of my experience, projects and skills.</p>
     <div class="row-btns"><a class="btn" href="${PROFILE.resume}" target="_blank" rel="noopener">Open resume ↗</a><a class="btn ghost" href="${PROFILE.resume}" download>Download PDF</a></div>`
 };
+
+// ─────────────────────────────────────────────────────────────
+//  Combat robotics section (full-screen "fight card" + standard view)
+// ─────────────────────────────────────────────────────────────
+function combatHTML(compact = false) {
+  const c = COMBAT;
+  return `
+  <header class="cb-hero">
+    <div class="cb-hero-text">
+      <div class="label">// combat robotics · ${esc(c.team)}</div>
+      <h2 class="cb-name">${esc(c.robot.toUpperCase())}</h2>
+      <p class="cb-role">${esc(c.role)} · ${esc(c.dates)}</p>
+      <div class="cb-badge"><span>🏆</span><b>4th Place · Semifinalist</b><small>WATBOTS Combat Robotics Tournament 2026</small></div>
+      <p class="cb-summary">${esc(c.summary)}</p>
+    </div>
+    <figure class="cb-photo"><img src="${esc(c.photo)}" alt="Bitflip, a black vertical-spinner combat robot with forks and foam wheels" loading="lazy"></figure>
+  </header>
+  <div class="cb-stats">${c.stats.map(s => `<div><dt>${esc(s.k)}</dt><dd>${esc(s.v)}</dd></div>`).join("")}</div>
+
+  <section class="cb-block">
+    <div class="label">// fight footage</div>
+    <h3>${esc(c.video.title)}</h3>
+    <div class="media cb-video"><video controls playsinline preload="none" poster="${esc(c.video.poster)}" src="${esc(c.video.src)}"></video></div>
+    <p class="caption">${esc(c.video.caption)}</p>
+  </section>
+
+  <section class="cb-block">
+    <div class="label">// by the numbers</div>
+    <div class="cb-numbers">${c.numbers.map(n => `<div class="cb-num"><b data-count="${esc(n.n)}">${esc(n.n)}</b><i>${esc(n.unit)}</i><span>${esc(n.label)}</span></div>`).join("")}</div>
+  </section>
+
+  <section class="cb-block cb-split">
+    <div>
+      <div class="label">// what I did</div>
+      <h3>My contributions</h3>
+      <ul class="cb-list">${c.contributions.map(x => `<li>${esc(x)}</li>`).join("")}</ul>
+    </div>
+    ${compact ? "" : `<div class="cb-rig">
+      <div class="rig-stage" id="rigStage" title="Drag to flick the spinner">
+        <div class="rig-ring"></div>
+        ${weaponSVG()}
+      </div>
+      <div class="rig-ui">
+        <span class="label">// weapon test rig</span>
+        <div class="rig-meter"><span id="rigBar"></span></div>
+        <button class="btn" id="rigSpin">Spin up ⟳</button>
+        <small>or drag the weapon to flick it</small>
+      </div>
+    </div>`}
+  </section>
+
+  <section class="cb-block">
+    <div class="label">// CAD · SOLIDWORKS</div>
+    <h3>Design files</h3>
+    <div class="cb-gallery">${c.gallery.map(g => `
+      <button class="cb-shot" data-lightbox="${esc(g.src)}" data-caption="${esc(g.title)} — ${esc(g.caption)}">
+        <img src="${esc(g.src)}" alt="${esc(g.title)}" loading="lazy">
+        <span><b>${esc(g.title)}</b>${esc(g.caption)}</span>
+      </button>`).join("")}</div>
+  </section>`;
+}
+
+// vector spinner (two hooked teeth, 180° symmetric) — same profile as the 3D model
+function weaponSVG() {
+  const pts = [];
+  for (let i = 0; i <= 160; i++) {
+    const a = (i / 160) * Math.PI * 2, ph = a % Math.PI;
+    const r = 46 + 46 * Math.pow(Math.max(0, 1 - ph / 1.35), 1.5);
+    pts.push(`${(100 + Math.cos(a) * r).toFixed(1)},${(100 + Math.sin(a) * r).toFixed(1)}`);
+  }
+  return `<svg id="rigWeapon" viewBox="0 0 200 200" role="img" aria-label="Bitflip spinner weapon">
+    <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9cfd6"/><stop offset=".5" stop-color="#8b939c"/><stop offset="1" stop-color="#5d646c"/></linearGradient></defs>
+    <polygon points="${pts.join(" ")}" fill="url(#wg)" stroke="#e9ecef" stroke-opacity=".35" stroke-width="1.2"/>
+    <circle cx="100" cy="100" r="13" fill="#14171b" stroke="#ffcf33" stroke-width="2"/>
+    <circle cx="100" cy="100" r="3" fill="#ffcf33"/>
+  </svg>`;
+}
+
+const combatEl = $("#combat");
+let rigRAF = null;
+function openCombat() {
+  $("#combatBody").innerHTML = combatHTML();
+  combatEl.classList.add("open"); combatEl.setAttribute("aria-hidden", "false"); combatEl.scrollTop = 0;
+  workshop && workshop.pause();
+  countUp(combatEl); startRig();
+}
+function closeCombat() {
+  combatEl.classList.remove("open"); combatEl.setAttribute("aria-hidden", "true");
+  cancelAnimationFrame(rigRAF); combatEl.querySelectorAll("video").forEach(v => v.pause());
+  setTimeout(() => { $("#combatBody").innerHTML = ""; }, 350);
+  if (workshop) { workshop.resume(); workshop.reset(); workshop.setEnabled(true); }
+}
+$("#combatClose").onclick = closeCombat;
+
+function countUp(scope) {
+  scope.querySelectorAll("[data-count]").forEach(el => {
+    const raw = el.dataset.count, neg = raw.startsWith("−"), num = parseFloat(raw.replace("−", ""));
+    if (isNaN(num) || !/^−?[\d.]+$/.test(raw)) return;
+    const dec = (raw.split(".")[1] || "").length, t0 = performance.now();
+    const step = now => { const k = Math.min(1, (now - t0) / 1100), e = 1 - Math.pow(1 - k, 3);
+      el.textContent = (neg ? "−" : "") + (num * e).toFixed(dec); if (k < 1) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+  });
+}
+
+// draggable spinner: flick it or press spin-up; friction slows it down
+function startRig() {
+  const stage = $("#rigStage"), img = $("#rigWeapon"), bar = $("#rigBar"); if (!stage) return;
+  let angle = 0, vel = 0, dragging = false, lastA = 0, lastT = 0;
+  const MAX = 60;
+  const ang = e => { const r = stage.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)); };
+  stage.onpointerdown = e => { dragging = true; stage.setPointerCapture(e.pointerId); lastA = ang(e); lastT = performance.now(); vel = 0; };
+  stage.onpointermove = e => { if (!dragging) return; const a = ang(e), now = performance.now();
+    let d = a - lastA; if (d > Math.PI) d -= 2 * Math.PI; if (d < -Math.PI) d += 2 * Math.PI;
+    angle += d; vel = Math.max(-MAX, Math.min(MAX, d / Math.max(0.001, (now - lastT) / 1000))); lastA = a; lastT = now; };
+  stage.onpointerup = stage.onpointercancel = () => { dragging = false; };
+  $("#rigSpin").onclick = () => { vel = MAX; };
+  let prev = performance.now();
+  const loop = now => { const dt = Math.min(0.05, (now - prev) / 1000); prev = now;
+    if (!dragging) { angle += vel * dt; vel *= Math.pow(0.55, dt); if (Math.abs(vel) < 0.02) vel = 0; }
+    img.style.transform = `rotate(${angle}rad)`;
+    const p = Math.min(1, Math.abs(vel) / MAX);
+    bar.style.width = `${p * 100}%`; stage.classList.toggle("hot", p > 0.6);
+    rigRAF = requestAnimationFrame(loop); };
+  rigRAF = requestAnimationFrame(loop);
+}
+
+// lightbox for CAD shots
+const lb = $("#lightbox");
+function openLightbox(src, cap) { $("#lightboxImg").src = src; $("#lightboxCap").textContent = cap || ""; lb.classList.add("open"); }
+lb.addEventListener("click", () => lb.classList.remove("open"));
 
 // ─────────────────────────────────────────────────────────────
 //  Project modal
@@ -92,6 +223,7 @@ modal.addEventListener("click", e => { if (e.target === modal) closeProject(); }
 
 // delegated clicks for cards + go-buttons anywhere
 document.addEventListener("click", e => {
+  const shot = e.target.closest("[data-lightbox]"); if (shot) { openLightbox(shot.dataset.lightbox, shot.dataset.caption); return; }
   const card = e.target.closest("[data-project]"); if (card) { openProject(card.dataset.project); return; }
   const go = e.target.closest("[data-go]"); if (go) { e.preventDefault(); select(go.dataset.go); }
 });
@@ -104,15 +236,17 @@ $("#stdContent").innerHTML = `
     <div class="label">// robotics · embedded · tinyml</div>
     <h1>${esc(PROFILE.tagline)}</h1>
     <p>${esc(PROFILE.role)}</p>
-    <div class="row-btns"><a class="btn" href="#s-projects">View projects</a><a class="btn ghost" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub ↗</a><a class="btn ghost" href="${PROFILE.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a></div>
+    <div class="row-btns"><a class="btn" href="#s-combat">Combat robotics</a><a class="btn ghost" href="#s-projects">Projects</a><a class="btn ghost" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub ↗</a><a class="btn ghost" href="${PROFILE.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a></div>
   </section>
   <section id="s-about"><div class="label">// about</div><h2>About</h2>${PROFILE.about.map(p => `<p>${esc(p)}</p>`).join("")}</section>
+  <section id="s-combat" class="std-combat">${combatHTML(true)}</section>
   <section id="s-projects"><div class="label">// projects</div><h2>Projects</h2>${projectCards()}</section>
   <section id="s-skills"><div class="label">// skills</div><h2>Skills</h2>${skillsHTML()}</section>
   <section id="s-contact"><div class="label">// contact</div><h2>Get in touch</h2>${contactHTML()}</section>
   <footer class="std-foot">Sughosh Desai · ${new Date().getFullYear()}</footer>`;
 
 const std = $("#standard");
+new IntersectionObserver((en, ob) => { if (en[0].isIntersecting) { countUp($("#s-combat")); ob.disconnect(); } }, { root: std, threshold: 0.3 }).observe($("#s-combat .cb-numbers"));
 let workshop = null;
 function showStandard(on) {
   std.classList.toggle("open", on); std.setAttribute("aria-hidden", String(!on));
@@ -144,7 +278,9 @@ function closePanel() {
 $("#panelClose").onclick = closePanel;
 document.addEventListener("keydown", e => {
   if (e.key !== "Escape") return;
-  if (modal.classList.contains("open")) closeProject();
+  if (lb.classList.contains("open")) lb.classList.remove("open");
+  else if (modal.classList.contains("open")) closeProject();
+  else if (combatEl.classList.contains("open")) closeCombat();
   else if (panel.classList.contains("open")) closePanel();
 });
 
@@ -152,11 +288,17 @@ const DROID_LINES = ["beep boop! I'm SD-01.", "my maker built me. here's the int
 let droidLine = 0;
 function select(id) {
   if (document.body.classList.contains("std-mode")) {
-    const map = { about: "#s-about", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact" };
+    const map = { about: "#s-about", combat: "#s-combat", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact" };
     if (map[id]) std.querySelector(map[id]).scrollIntoView({ behavior: "smooth" });
     return;
   }
   if (id === "suit") { toast("MK-0 — a side quest. 8% done, don't look too closely."); return; }
+  if (id === "combat") {
+    if (panel.classList.contains("open")) { panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true"); document.body.classList.remove("panel-open"); }
+    if (workshop) { workshop.focus("combat"); workshop.setEnabled(false); }
+    setTimeout(openCombat, workshop ? 800 : 0);
+    return;
+  }
   const projectIds = PROJECTS.map(p => p.id);
   if (workshop) {
     workshop.focus(id === "projects" ? "trash-robot" : id);

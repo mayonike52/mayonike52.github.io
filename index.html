@@ -44,9 +44,10 @@
   </header>
 
   <nav class="hud-bottom" aria-label="Workshop sections">
-    <p class="hud-hint" id="hint">Click <b>SD-01</b> (the droid) to say hi, or explore the workshop</p>
+    <p class="hud-hint" id="hint">Click <b>SD-01</b> to say hi · check out <b>Bitflip</b> in the arena</p>
     <div class="quicknav">
       <button data-go="about">About</button>
+      <button data-go="combat" class="qn-hot">Combat bot</button>
       <button data-go="projects">Projects</button>
       <button data-go="skills">Skills</button>
       <button data-go="contact">Contact</button>
@@ -77,12 +78,21 @@
     </div>
   </div>
 
+  <!-- combat robotics section -->
+  <section id="combat" aria-hidden="true" aria-label="Combat robotics: Bitflip">
+    <div class="cb-topbar"><div class="cb-stripe"></div><button class="panel-back" id="combatClose">← Back to workshop</button></div>
+    <div class="cb-wrap" id="combatBody"></div>
+  </section>
+
+  <!-- lightbox -->
+  <div id="lightbox" role="dialog" aria-label="Image preview"><figure><img id="lightboxImg" alt=""><figcaption id="lightboxCap"></figcaption></figure></div>
+
   <!-- standard (non-3D) view -->
   <main id="standard" aria-hidden="true">
     <div class="std-bar">
       <span class="std-logo">SUGHOSH DESAI</span>
       <nav>
-        <a href="#s-about">About</a><a href="#s-projects">Projects</a><a href="#s-skills">Skills</a><a href="#s-contact">Contact</a>
+        <a href="#s-about">About</a><a href="#s-combat">Combat</a><a href="#s-projects">Projects</a><a href="#s-skills">Skills</a><a href="#s-contact">Contact</a>
         <a href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
       </nav>
       <button class="chip chip-accent" id="to3d">◆ Enter 3D workshop</button>

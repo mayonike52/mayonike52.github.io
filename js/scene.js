@@ -394,6 +394,7 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
   // ── battle bot test box (floor, right) ──
   const bb = new THREE.Group(); bb.position.set(3.55, 0, 0.55); bb.rotation.y = -0.5; root.add(bb);
   at(bb, box(2.2, 0.12, 1.6, 0x2b3038, 0.02), 0, 0.06, 0);
+  at(bb, box(2.08, 0.01, 1.48, mat(0xd2b27a, { roughness: 0.95 }), 0), 0, 0.125, 0);
   const caution = cautionTex(); caution.repeat.set(6, 1);
   for (const [w, x, z, ry] of [[2.2, 0, 0.81, 0], [2.2, 0, -0.81, Math.PI], [1.6, 1.11, 0, Math.PI / 2], [1.6, -1.11, 0, -Math.PI / 2]]) {
     const s = at(bb, new THREE.Mesh(new THREE.PlaneGeometry(w, 0.1), new THREE.MeshStandardMaterial({ map: caution, roughness: 0.8 })), x, 0.06, z); s.rotation.y = ry;
@@ -405,20 +406,41 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
   for (const [x, z] of [[-1.1, -0.8], [1.1, -0.8], [-1.1, 0.8], [1.1, 0.8]]) at(bb, box(0.05, 0.95, 0.05, C.darkMetal, 0.01), x, 0.57, z);
   for (const z of [-0.8, 0.8]) at(bb, box(2.25, 0.04, 0.04, C.darkMetal, 0.01), 0, 1.05, z);
   for (const x of [-1.1, 1.1]) at(bb, box(0.04, 0.04, 1.65, C.darkMetal, 0.01), x, 1.05, 0);
-  // the bot: low wedge with horizontal spinner
-  const bot = at(bb, new THREE.Group(), 0, 0.12, 0);
-  at(bot, box(0.9, 0.2, 0.7, 0x2a2e35, 0.03), 0, 0.12, 0);
-  const wedgeShape = new THREE.Shape(); wedgeShape.moveTo(0, 0); wedgeShape.lineTo(0.38, 0); wedgeShape.lineTo(0, 0.2); wedgeShape.lineTo(0, 0);
-  const wedge = shadow(new THREE.Mesh(new THREE.ExtrudeGeometry(wedgeShape, { depth: 0.72, bevelEnabled: false }), mat(C.orange, { metalness: 0.3, roughness: 0.45 })));
-  at(bot, wedge, 0.45, 0.02, -0.36);
-  for (const z of [-0.4, 0.4]) { const w = at(bot, cyl(0.13, 0.13, 0.1, 0x16181c, 20), -0.15, 0.13, z); w.rotation.x = Math.PI / 2; }
-  const spinner = at(bot, new THREE.Group(), -0.05, 0.3, 0);
-  at(spinner, cyl(0.06, 0.06, 0.08, C.darkMetal, 16), 0, 0, 0);
-  at(spinner, box(1.0, 0.04, 0.13, 0xb8c0c8, 0.01, { metalness: 0.85, roughness: 0.25 }), 0, 0.03, 0);
-  at(bot, box(0.06, 0.04, 0.06, 0x37c3b2, 0.01, { emissive: 0x37c3b2, emissiveIntensity: 1.5 }), -0.38, 0.23, 0.25);
-  // WIP sign
-  const sign = at(bb, plane(0.55, 0.34, signTex(["WIP", "build in progress"])), -0.75, 0.75, 0.82); sign.material.side = THREE.DoubleSide;
-  register(bb, "battlebot", "Battle Bot — in progress", { pos: [2.7, 2.5, 4.4], target: [3.55, 0.6, 0.55] });
+  // the bot: Bitflip — black two-part chassis, 4 forks, foam wheels, vertical spinner
+  const bot = at(bb, new THREE.Group(), 0.05, 0.12, -0.05); bot.rotation.y = 0.85;
+  const blk = mat(0x1c1e22, { roughness: 0.6 });
+  at(bot, box(0.42, 0.17, 0.46, blk, 0.02), -0.33, 0.12, 0);
+  at(bot, box(0.42, 0.17, 0.46, blk, 0.02), 0.33, 0.12, 0);
+  at(bot, box(1.08, 0.025, 0.46, mat(0x111316), 0.01), 0, 0.215, -0.02);
+  // top-plate cutouts (lighter recess)
+  for (const x of [-0.33, 0.33]) at(bot, box(0.24, 0.01, 0.2, mat(0x3a3e46), 0.005), x, 0.23, -0.04);
+  // forks
+  for (const x of [-0.5, -0.16, 0.16, 0.5]) {
+    const fs = new THREE.Shape(); fs.moveTo(0, 0); fs.lineTo(0.34, 0); fs.lineTo(0, 0.12); fs.lineTo(0, 0);
+    const f = shadow(new THREE.Mesh(new THREE.ExtrudeGeometry(fs, { depth: 0.05, bevelEnabled: false }), blk));
+    at(bot, f, x - 0.025, 0.04, 0.23); f.rotation.y = -Math.PI / 2;
+  }
+  // foam wheels on the ends
+  for (const x of [-0.6, 0.6]) {
+    const w = at(bot, cyl(0.13, 0.13, 0.1, 0xefe3cf, 24), x, 0.13, -0.05); w.rotation.z = Math.PI / 2;
+    const hub = at(bot, cyl(0.06, 0.06, 0.105, 0x1c1e22, 12), x, 0.13, -0.05); hub.rotation.z = Math.PI / 2;
+  }
+  // weapon motor between the halves + vertical spinner
+  const wm = at(bot, cyl(0.07, 0.07, 0.2, 0x2a2e35, 16), 0, 0.15, -0.08); wm.rotation.z = Math.PI / 2;
+  const spinner = at(bot, new THREE.Group(), 0, 0.2, 0.12);
+  const ws = new THREE.Shape();
+  for (let i = 0; i <= 64; i++) {
+    const a = (i / 64) * Math.PI * 2, ph = a % Math.PI;
+    const r = 0.11 + 0.1 * Math.max(0, 1 - ph / 1.1);
+    const P = [Math.cos(a) * r, Math.sin(a) * r]; i === 0 ? ws.moveTo(...P) : ws.lineTo(...P);
+  }
+  const wGeo = new THREE.ExtrudeGeometry(ws, { depth: 0.035, bevelEnabled: false }); wGeo.center();
+  const weapon = shadow(new THREE.Mesh(wGeo, mat(0x2b2b2e, { metalness: 0.5, roughness: 0.4 })));
+  weapon.rotation.y = Math.PI / 2; spinner.add(weapon);
+  for (const sgn of [-1, 1]) { const tooth = at(spinner, box(0.04, 0.05, 0.02, 0x2f6fe0, 0.005), 0, 0.2 * sgn, 0.02 * sgn); void tooth; }
+  // sign
+  const sign = at(bb, plane(0.6, 0.37, signTex(["4TH", "WATBOTS 2026"])), -0.75, 0.75, 0.82); sign.material.side = THREE.DoubleSide;
+  register(bb, "combat", "Bitflip — Combat Robotics", { pos: [2.7, 2.5, 4.4], target: [3.55, 0.6, 0.55] });
 
   // ── scrappy suit-in-progress (back-left corner, deliberately minor) ──
   const suit = new THREE.Group(); suit.position.set(-5.3, 0, -2.0); suit.rotation.y = 0.55; root.add(suit);
@@ -650,7 +672,7 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
     tinyLeds.forEach((l, i) => { const s = (Math.sin(t * 5 - i * 0.8) + 1) / 2; l.material.emissiveIntensity = 0.15 + s * s * (hovered === tiny ? 4 : 2); });
 
     // battle bot spinner
-    spinner.rotation.y += dt * (hovered === bb || focused === bb ? 28 : 1.2);
+    spinner.rotation.x -= dt * (hovered === bb || focused === bb ? 28 : 1.5);
 
     // string lights twinkle
     bulbs.forEach((b, i) => { const s = 0.75 + 0.25 * Math.sin(t * 1.5 + i * 1.7); b.material.color.setRGB(1 * s, 0.85 * s, 0.62 * s); });
