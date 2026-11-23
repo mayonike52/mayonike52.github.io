@@ -1,4 +1,4 @@
-import { PROFILE, PROJECTS, SKILLS, COMBAT } from "./data.js";
+import { PROFILE, PROJECTS, SKILLS, COMBAT, EXPERIENCE, EDUCATION, HONORS } from "./data.js";
 
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -31,6 +31,23 @@ function contactHTML() {
     <a class="contact-row" href="${PROFILE.github}" target="_blank" rel="noopener"><span class="ci">gh</span><span><b>GitHub</b><small>mayonike52</small></span><span class="arrow">↗</span></a>
   </div>`;
 }
+function experienceHTML() {
+  return `<ol class="timeline">${EXPERIENCE.map((x, i) => `
+    <li class="tl-item${i === 0 ? " current" : ""}">
+      <div class="tl-dot"></div>
+      <div class="tl-head">
+        <div><h3>${esc(x.role)}</h3><p class="tl-org">${esc(x.org)} · ${esc(x.place)}</p></div>
+        <span class="tl-date">${esc(x.dates)}</span>
+      </div>
+      <span class="tag${x.link ? " accent" : ""}">${esc(x.tag)}</span>
+      <ul>${x.points.map(pt => `<li>${esc(pt)}</li>`).join("")}</ul>
+      ${x.link ? `<button class="tl-link" data-go="${x.link}">See Batmobile →</button>` : ""}
+    </li>`).join("")}</ol>
+  <div class="edu-grid">
+    <div class="edu-card"><div class="label">// education</div><b>${esc(EDUCATION.school)}</b><span>${esc(EDUCATION.degree)}</span><small>${esc(EDUCATION.dates)}</small></div>
+    <div class="edu-card"><div class="label">// honors</div><ul>${HONORS.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>
+  </div>`;
+}
 const PANELS = {
   about: () => `
     <div class="label">// unit specs</div>
@@ -41,9 +58,10 @@ const PANELS = {
       <div><dt>Base</dt><dd>University of Waterloo</dd></div>
       <div><dt>Program</dt><dd>Nanotechnology Engineering</dd></div>
       <div><dt>Focus</dt><dd>Robotics · Embedded · TinyML</dd></div>
-      <div><dt>Design team</dt><dd>WATBOT · Bitflip</dd></div>
+      <div><dt>Design team</dt><dd>WATBOT · Batmobile</dd></div>
     </dl>
     <div class="row-btns"><button class="btn" data-go="combat">Combat robotics</button><button class="btn ghost" data-go="projects">Projects</button><a class="btn ghost" href="${PROFILE.resume}" target="_blank" rel="noopener">Resume ↗</a></div>`,
+  experience: () => `<div class="label">// logbook</div><h2>Experience</h2>${experienceHTML()}`,
   projects: () => `<div class="label">// mission logs</div><h2>Projects</h2>${projectCards()}`,
   skills: () => `<div class="label">// installed modules</div><h2>Skills</h2>${skillsHTML()}`,
   contact: () => `<div class="label">// comm channel open</div><h2>Get in touch</h2>
@@ -67,7 +85,7 @@ function combatHTML(compact = false) {
       <div class="cb-badge"><span>🏆</span><b>4th Place · Semifinalist</b><small>WATBOTS Combat Robotics Tournament 2026</small></div>
       <p class="cb-summary">${esc(c.summary)}</p>
     </div>
-    <figure class="cb-photo"><img src="${esc(c.photo)}" alt="Bitflip, a black vertical-spinner combat robot with forks and foam wheels" loading="lazy"></figure>
+    <figure class="cb-photo"><img src="${esc(c.photo)}" alt="Batmobile, a black vertical-spinner combat robot with forks and foam wheels" loading="lazy"></figure>
   </header>
   <div class="cb-stats">${c.stats.map(s => `<div><dt>${esc(s.k)}</dt><dd>${esc(s.v)}</dd></div>`).join("")}</div>
 
@@ -122,7 +140,7 @@ function weaponSVG() {
     const r = 46 + 46 * Math.pow(Math.max(0, 1 - ph / 1.35), 1.5);
     pts.push(`${(100 + Math.cos(a) * r).toFixed(1)},${(100 + Math.sin(a) * r).toFixed(1)}`);
   }
-  return `<svg id="rigWeapon" viewBox="0 0 200 200" role="img" aria-label="Bitflip spinner weapon">
+  return `<svg id="rigWeapon" viewBox="0 0 200 200" role="img" aria-label="Batmobile spinner weapon">
     <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c9cfd6"/><stop offset=".5" stop-color="#8b939c"/><stop offset="1" stop-color="#5d646c"/></linearGradient></defs>
     <polygon points="${pts.join(" ")}" fill="url(#wg)" stroke="#e9ecef" stroke-opacity=".35" stroke-width="1.2"/>
     <circle cx="100" cy="100" r="13" fill="#14171b" stroke="#ffcf33" stroke-width="2"/>
@@ -240,6 +258,7 @@ $("#stdContent").innerHTML = `
   </section>
   <section id="s-about"><div class="label">// about</div><h2>About</h2>${PROFILE.about.map(p => `<p>${esc(p)}</p>`).join("")}</section>
   <section id="s-combat" class="std-combat">${combatHTML(true)}</section>
+  <section id="s-experience"><div class="label">// experience</div><h2>Experience</h2>${experienceHTML()}</section>
   <section id="s-projects"><div class="label">// projects</div><h2>Projects</h2>${projectCards()}</section>
   <section id="s-skills"><div class="label">// skills</div><h2>Skills</h2>${skillsHTML()}</section>
   <section id="s-contact"><div class="label">// contact</div><h2>Get in touch</h2>${contactHTML()}</section>
@@ -288,7 +307,7 @@ const DROID_LINES = ["beep boop! I'm SD-01.", "my maker built me. here's the int
 let droidLine = 0;
 function select(id) {
   if (document.body.classList.contains("std-mode")) {
-    const map = { about: "#s-about", combat: "#s-combat", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact" };
+    const map = { about: "#s-about", combat: "#s-combat", experience: "#s-experience", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact" };
     if (map[id]) std.querySelector(map[id]).scrollIntoView({ behavior: "smooth" });
     return;
   }

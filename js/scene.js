@@ -320,6 +320,26 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
   at(root, box(0.5, 0.05, 0.3, 0x5d646c, 0.02), 1.75, DESK_Y + 0.025, -2.45);
   for (let i = 0; i < 8; i++) at(root, cyl(0.025, 0.025, 0.05, [0xffc23d, 0x37c3b2, C.metal][i % 3], 10), 1.57 + (i % 4) * 0.12, DESK_Y + 0.07, -2.52 + Math.floor(i / 4) * 0.14);
 
+  // ── logbook stack (Experience) ──
+  const logTex = canvasTex(512, 320, (g, w, h) => {
+    g.fillStyle = "#fbf8f0"; g.fillRect(0, 0, w, h);
+    g.fillStyle = "rgba(0,0,0,.08)"; g.fillRect(w / 2 - 3, 0, 6, h);
+    g.strokeStyle = "#c9d6e6"; g.lineWidth = 2;
+    for (let y = 70; y < h; y += 26) { g.beginPath(); g.moveTo(18, y); g.lineTo(w / 2 - 14, y); g.moveTo(w / 2 + 14, y); g.lineTo(w - 18, y); g.stroke(); }
+    g.fillStyle = "#2a2f36"; g.font = `700 30px ${SANS}`; g.fillText("LOGBOOK", 30, 48);
+    g.fillStyle = "#e5602a"; g.font = `20px ${MONO}`; g.fillText("2023 → now", w / 2 + 30, 46);
+    g.fillStyle = "#5d646c";
+    [[30, 92, 150], [30, 118, 190], [30, 170, 120], [30, 196, 170], [w / 2 + 30, 92, 160], [w / 2 + 30, 144, 140], [w / 2 + 30, 170, 185], [w / 2 + 30, 222, 110]]
+      .forEach(([x, y, l]) => g.fillRect(x, y - 10, l, 6));
+  });
+  const logbook = new THREE.Group(); logbook.position.set(2.45, DESK_Y, -1.42); logbook.rotation.y = -0.35; root.add(logbook);
+  at(logbook, box(0.62, 0.07, 0.46, 0x2f5d8a, 0.015), 0, 0.035, 0);
+  at(logbook, box(0.58, 0.06, 0.42, 0x8b3a2b, 0.015), 0.02, 0.1, -0.01).rotation.y = 0.12;
+  at(logbook, box(0.7, 0.03, 0.48, 0x2a2f36, 0.01), 0, 0.145, 0);
+  const pages = at(logbook, plane(0.66, 0.44, logTex), 0, 0.162, 0); pages.rotation.x = -Math.PI / 2; pages.receiveShadow = true;
+  const pencil = at(logbook, cyl(0.012, 0.012, 0.42, 0xffc23d, 6), 0.08, 0.175, 0.05); pencil.rotation.z = Math.PI / 2; pencil.rotation.y = 0.5;
+  register(logbook, "experience", "Logbook — Experience", { pos: [2.6, 2.75, 0.9], target: [3.05, 1.6, -1.42] });
+
   // ── wall: pegboard (Skills) ──
   const peg = new THREE.Group(); peg.position.set(-3.7, 3.4, BACK + 0.04); root.add(peg);
   at(peg, box(2.5, 1.8, 0.05, 0x8a6b4a, 0.01), 0, 0, 0);
@@ -406,7 +426,7 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
   for (const [x, z] of [[-1.1, -0.8], [1.1, -0.8], [-1.1, 0.8], [1.1, 0.8]]) at(bb, box(0.05, 0.95, 0.05, C.darkMetal, 0.01), x, 0.57, z);
   for (const z of [-0.8, 0.8]) at(bb, box(2.25, 0.04, 0.04, C.darkMetal, 0.01), 0, 1.05, z);
   for (const x of [-1.1, 1.1]) at(bb, box(0.04, 0.04, 1.65, C.darkMetal, 0.01), x, 1.05, 0);
-  // the bot: Bitflip — black two-part chassis, 4 forks, foam wheels, vertical spinner
+  // the bot: Batmobile — black two-part chassis, 4 forks, foam wheels, vertical spinner
   const bot = at(bb, new THREE.Group(), 0.05, 0.12, -0.05); bot.rotation.y = 0.85;
   const blk = mat(0x1c1e22, { roughness: 0.6 });
   at(bot, box(0.42, 0.17, 0.46, blk, 0.02), -0.33, 0.12, 0);
@@ -440,7 +460,7 @@ export function createWorkshop(container, { onSelect, onHover, onReady } = {}) {
   for (const sgn of [-1, 1]) { const tooth = at(spinner, box(0.04, 0.05, 0.02, 0x2f6fe0, 0.005), 0, 0.2 * sgn, 0.02 * sgn); void tooth; }
   // sign
   const sign = at(bb, plane(0.6, 0.37, signTex(["4TH", "WATBOTS 2026"])), -0.75, 0.75, 0.82); sign.material.side = THREE.DoubleSide;
-  register(bb, "combat", "Bitflip — Combat Robotics", { pos: [2.7, 2.5, 4.4], target: [3.55, 0.6, 0.55] });
+  register(bb, "combat", "Batmobile — Combat Robotics", { pos: [2.7, 2.5, 4.4], target: [3.55, 0.6, 0.55] });
 
   // ── scrappy suit-in-progress (back-left corner, deliberately minor) ──
   const suit = new THREE.Group(); suit.position.set(-5.3, 0, -2.0); suit.rotation.y = 0.55; root.add(suit);

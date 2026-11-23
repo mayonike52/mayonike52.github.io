@@ -54,11 +54,11 @@ export const SKILLS = [
 
 // ── Combat robotics section ──────────────────────────────────
 export const COMBAT = {
-  robot: "Bitflip",
+  robot: "Batmobile",
   team: "WATBOT Design Team",
   role: "Design Team Engineer",
   dates: "Sept. 2026 – Present",
-  summary: "Bitflip is our team's vertical-spinner combat robot. It finished 4th at the WATBOTS 2026 tournament. I work on its mechanical design: the spinner weapon and the motor-shaft mounts that hold it, modelled in SOLIDWORKS.",
+  summary: "Batmobile is our team's vertical-spinner combat robot. It finished 4th at the WATBOTS 2026 tournament. I work on its mechanical design: the spinner weapon and the motor-shaft mounts that hold it, modelled in SOLIDWORKS.",
   stats: [
     { k: "Result",  v: "4th place · Semifinalist", sub: "WATBOTS Combat Robotics Tournament 2026" },
     { k: "Weapon",  v: "Vertical spinner" },
@@ -75,11 +75,57 @@ export const COMBAT = {
     "Iterated on 3 designs of the weapon and motor-shaft mounts so the mount contacts the floor for added traction and stability, while keeping a 1 cm clearance from the weapon tip to the ground.",
     "Redesigned the vertical spinner's geometry in SOLIDWORKS, cutting 1.21 g to balance the centre of mass at (0, 0, 0) without impacting durability."
   ],
-  video: { src: "videos/bitflip-vs-batmobile.mp4", poster: "images/bitflip/fight-poster.jpg", title: "Bitflip vs. Batmobile", caption: "Tournament fight. Bitflip is the black bot." },
-  photo: "images/bitflip/bitflip-photo.jpg",
+  video: { src: "videos/batmobile-vs-bitflip.mp4", poster: "images/batmobile/fight-poster.jpg", title: "Batmobile vs. Bitflip", caption: "Tournament fight. Batmobile (ours) is the black bot with the forks." },
+  photo: "images/batmobile/batmobile-photo.jpg",
   gallery: [
-    { src: "images/bitflip/cad-assembly.png", title: "Full assembly", caption: "Chassis, forks and spinner in SOLIDWORKS." },
-    { src: "images/bitflip/cad-weapon.png",   title: "Spinner weapon", caption: "Redesigned geometry: −1.21 g, COM at the origin." },
-    { src: "images/bitflip/cad-mount.png",    title: "Motor-shaft mount", caption: "One of 3 mount iterations; it touches the floor for traction." }
+    { src: "images/batmobile/cad-assembly.png", title: "Full assembly", caption: "Chassis, forks and spinner in SOLIDWORKS." },
+    { src: "images/batmobile/cad-weapon.png",   title: "Spinner weapon", caption: "Redesigned geometry: −1.21 g, COM at the origin." },
+    { src: "images/batmobile/cad-mount.png",    title: "Motor-shaft mount", caption: "One of 3 mount iterations; it touches the floor for traction." }
   ]
 };
+
+// ── Experience (newest first) ────────────────────────────────
+export const EXPERIENCE = [
+  {
+    org: "WATBOT Design Team", role: "Design Team Engineer", place: "Waterloo, ON", dates: "Sept. 2026 – Present",
+    tag: "Combat robotics", link: "combat",
+    points: [
+      "Iterated on 3 designs of the weapon and motor-shaft mounts so the mount contacts the floor for added traction and stability while keeping a 1 cm clearance from the weapon tip to the ground.",
+      "Redesigned the vertical spinner's geometry in SOLIDWORKS, reducing mass by 1.21 g to balance the centre of mass at (0, 0, 0) without impacting durability."
+    ]
+  },
+  {
+    org: "Microart Services", role: "Hardware Test & Assembly Co-op", place: "Markham, ON", dates: "July 2024 – Aug. 2024",
+    tag: "Hardware",
+    points: [
+      "Assembled, validated, and visually inspected 30 to 50 PCB, power, and control boards daily against technical product schematics.",
+      "Identified and isolated defective units before shipment, diagnosing soldering defects, reversed component polarities, and faulty components."
+    ]
+  },
+  {
+    org: "Kumon", role: "Marking Assistant", place: "Markham, ON", dates: "Aug. 2023 – Aug. 2026",
+    tag: "Teaching",
+    points: [
+      "Delivered individualized math and reading instruction to 10 students per hour, adapting explanations to target core learning gaps.",
+      "Evaluated and graded coursework quickly, giving targeted feedback to reinforce fundamentals and move students to higher curricula."
+    ]
+  },
+  {
+    org: "Cornell Community Centre", role: "Aquatics Assistant", place: "Markham, ON", dates: "Sept. 2023 – Jan. 2024",
+    tag: "Teaching",
+    points: [
+      "Instructed swimming and water-safety classes for groups of 4 to 8 children, teaching lifesaving maneuvers, self-rescue protocols, and water-survival skills.",
+      "Evaluated individual swimming proficiency and structured progressive drills to improve stroke technique and safety in the water."
+    ]
+  }
+];
+
+export const EDUCATION = {
+  school: "University of Waterloo", degree: "BASc, Nanotechnology Engineering", dates: "Sept. 2026 – Apr. 2031"
+};
+
+export const HONORS = [
+  "President's Scholarship, University of Waterloo",
+  "4th Place / Semifinalist, WATBOTS Combat Robotics Tournament (2026)",
+  "Top 20 International Finalist, DECA ICDC (Project Management)"
+];
