@@ -19,6 +19,19 @@ export const PROFILE = {
 // status: "complete" | "in-progress"
 export const PROJECTS = [
   {
+    id: "r2",
+    title: "R2 Astromech Build",
+    status: "in-progress",
+    tags: ["Robotics", "Fabrication", "Personal build"],
+    desc: "An astromech-style droid I'm building at home right now. Frame, dome and panels are underway. Build log and photos coming soon.",
+    video: "",
+    videoCaption: "",
+    schematics: [],
+    schematicCaption: "",
+    github: "",
+    links: []
+  },
+  {
     id: "trash-robot",
     title: "Trash Collection Robot",
     status: "complete",

@@ -57,10 +57,22 @@ const PANELS = {
     <dl class="specs">
       <div><dt>Base</dt><dd>University of Waterloo</dd></div>
       <div><dt>Program</dt><dd>Nanotechnology Engineering</dd></div>
-      <div><dt>Focus</dt><dd>Robotics · Embedded · TinyML</dd></div>
+      <div><dt>Focus</dt><dd>Robotics · Embedded → Bio</dd></div>
       <div><dt>Design team</dt><dd>WATBOT · Batmobile</dd></div>
     </dl>
     <div class="row-btns"><button class="btn" data-go="combat">Combat robotics</button><button class="btn ghost" data-go="projects">Projects</button><a class="btn ghost" href="${PROFILE.resume}" target="_blank" rel="noopener">Resume ↗</a></div>`,
+  bio: () => `<div class="label">// 1 µm · next</div><h2>Next: bio-robotics</h2>
+    <p class="lead">This level is mostly empty on purpose.</p>
+    <p>Long-term, I want to work where robotics meets biology: bio-related engineering, built on the hardware, embedded and mechanical skills I'm developing now.</p>
+    <p>Nanotechnology Engineering at Waterloo is my bridge between the two. It's the scale where machines and living systems start to overlap.</p>
+    <div class="next-box"><div class="next-stripe"></div><p><b>Coming soon.</b> My first bio-related projects will live right here, inside this cell.</p></div>
+    <div class="row-btns"><button class="btn" data-go="about">About me</button><button class="btn ghost" data-go="projects">Current projects</button></div>`,
+  education: () => `<div class="label">// 1 nm · the blueprint</div><h2>Education & honors</h2>
+    <div class="edu-grid">
+      <div class="edu-card"><div class="label">// education</div><b>${esc(EDUCATION.school)}</b><span>${esc(EDUCATION.degree)}</span><small>${esc(EDUCATION.dates)}</small></div>
+      <div class="edu-card"><div class="label">// honors</div><ul>${HONORS.map(h => `<li>${esc(h)}</li>`).join("")}</ul></div>
+    </div>
+    <div class="row-btns"><a class="btn" href="${PROFILE.resume}" target="_blank" rel="noopener">Open resume ↗</a><button class="btn ghost" data-go="experience">Experience</button></div>`,
   experience: () => `<div class="label">// logbook</div><h2>Experience</h2>${experienceHTML()}`,
   projects: () => `<div class="label">// mission logs</div><h2>Projects</h2>${projectCards()}`,
   skills: () => `<div class="label">// installed modules</div><h2>Skills</h2>${skillsHTML()}`,
@@ -224,7 +236,7 @@ function openProject(id) {
       const links = [...(p.github ? [{ label: "GitHub repository", url: p.github }] : []), ...p.links];
       c.innerHTML = links.length
         ? `<div class="contact">${links.map(l => `<a class="contact-row" href="${esc(l.url)}" target="_blank" rel="noopener"><span class="ci">↗</span><span><b>${esc(l.label)}</b><small>${esc(l.url.replace(/^https?:\/\//, ""))}</small></span><span class="arrow">↗</span></a>`).join("")}</div>`
-        : `<div class="wip-box"><div class="wip-stripe"></div><p><b>Build in progress.</b> CAD, build log and fight footage will land here soon.</p></div>`;
+        : `<div class="wip-box"><div class="wip-stripe"></div><p><b>Build in progress.</b> Photos and a build log will land here soon.</p></div>`;
     }
   };
   render(tabs[0][0]);
@@ -251,7 +263,7 @@ document.addEventListener("click", e => {
 // ─────────────────────────────────────────────────────────────
 $("#stdContent").innerHTML = `
   <section class="std-hero">
-    <div class="label">// robotics · embedded · tinyml</div>
+    <div class="label">// robotics · embedded · nano → bio</div>
     <h1>${esc(PROFILE.tagline)}</h1>
     <p>${esc(PROFILE.role)}</p>
     <div class="row-btns"><a class="btn" href="#s-combat">Combat robotics</a><a class="btn ghost" href="#s-projects">Projects</a><a class="btn ghost" href="${PROFILE.github}" target="_blank" rel="noopener">GitHub ↗</a><a class="btn ghost" href="${PROFILE.linkedin}" target="_blank" rel="noopener">LinkedIn ↗</a></div>
@@ -260,6 +272,7 @@ $("#stdContent").innerHTML = `
   <section id="s-combat" class="std-combat">${combatHTML(true)}</section>
   <section id="s-experience"><div class="label">// experience</div><h2>Experience</h2>${experienceHTML()}</section>
   <section id="s-projects"><div class="label">// projects</div><h2>Projects</h2>${projectCards()}</section>
+  <section id="s-bio"><div class="label">// next</div><h2>Next: bio-robotics</h2><p>Long-term, I want to work where robotics meets biology: bio-related engineering, built on the hardware, embedded and mechanical skills I'm developing now. Nanotechnology Engineering at Waterloo is my bridge between the two. My first bio-related projects will live here.</p></section>
   <section id="s-skills"><div class="label">// skills</div><h2>Skills</h2>${skillsHTML()}</section>
   <section id="s-contact"><div class="label">// contact</div><h2>Get in touch</h2>${contactHTML()}</section>
   <footer class="std-foot">Sughosh Desai · ${new Date().getFullYear()}</footer>`;
@@ -303,34 +316,70 @@ document.addEventListener("keydown", e => {
   else if (panel.classList.contains("open")) closePanel();
 });
 
-const DROID_LINES = ["beep boop! I'm SD-01.", "my maker built me. here's the intel →", "bzzt. scanning visitor… friendly."];
+const DROID_LINES = {
+  workshop: ["beep boop! I'm SD-01.", "scroll down — I'll shrink with you.", "excuse the mess. he works like this."],
+  circuit: ["whoa. we're 1 mm tall now.", "this is where the code lives.", "careful, that trace is hot."],
+  cell: ["nanobot mode: engaged.", "this is where he wants to end up.", "I think that mitochondria likes me."],
+  nano: ["we're made of these, you know.", "1 nanometre. that's the nanotech part.", "I can see your atoms from here."]
+};
+const DECO = {
+  "deco-coffee": "Coffee #3. It's a messy-desk kind of workshop.",
+  "deco-chips": "Engineering runs on chips. The snack kind too.",
+  "deco-water": "Hydration check ✓",
+  "deco-guitar": "Off the clock: guitar.",
+  "deco-gym": "Gym is part of the build schedule.",
+  "deco-mito": "The powerhouse of the cell. Obviously.",
+  suit: "??? — a side quest at 8%. Don't look too closely."
+};
 let droidLine = 0;
-function select(id) {
+const projectIds = PROJECTS.map(p => p.id);
+function closePanelQuiet() { if (panel.classList.contains("open")) { panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true"); document.body.classList.remove("panel-open"); } }
+async function select(id) {
   if (document.body.classList.contains("std-mode")) {
-    const map = { about: "#s-about", combat: "#s-combat", experience: "#s-experience", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact" };
+    const map = { about: "#s-about", combat: "#s-combat", experience: "#s-experience", projects: "#s-projects", skills: "#s-skills", contact: "#s-contact", bio: "#s-bio", education: "#s-experience" };
     if (map[id]) std.querySelector(map[id]).scrollIntoView({ behavior: "smooth" });
     return;
   }
-  if (id === "suit") { toast("MK-0 — a side quest. 8% done, don't look too closely."); return; }
-  if (id === "combat") {
-    if (panel.classList.contains("open")) { panel.classList.remove("open"); panel.setAttribute("aria-hidden", "true"); document.body.classList.remove("panel-open"); }
-    if (workshop) { workshop.focus("combat"); workshop.setEnabled(false); }
-    setTimeout(openCombat, workshop ? 800 : 0);
-    return;
-  }
-  const projectIds = PROJECTS.map(p => p.id);
+  if (DECO[id]) { toast(DECO[id]); return; }
+  closePanelQuiet();
   if (workshop) {
-    workshop.focus(id === "projects" ? "trash-robot" : id);
     workshop.setEnabled(false);
+    const travel = !(id === "resume" && workshop.levelOf("resume") !== workshop.level);
+    if (travel) await workshop.focus(id === "projects" ? "trash-robot" : id);
   }
-  if (id === "about") speak(DROID_LINES[droidLine++ % DROID_LINES.length]);
+  if (id === "about") { const k = workshop ? workshop.levels[workshop.level].key : "workshop"; const lines = DROID_LINES[k]; speak(lines[droidLine++ % lines.length]); }
+  if (id === "combat") { openCombat(); return; }
   if (projectIds.includes(id)) {
-    setTimeout(() => { openProject(id); }, workshop ? 700 : 0);
-    // when modal closes return the camera home
-    const watch = setInterval(() => { if (!modal.classList.contains("open")) { clearInterval(watch); if (!panel.classList.contains("open")) { workshop && workshop.reset(); workshop && workshop.setEnabled(true); } } }, 300);
+    openProject(id);
+    const watch = setInterval(() => { if (!modal.classList.contains("open")) { clearInterval(watch); if (!panel.classList.contains("open") && !combatEl.classList.contains("open")) { workshop && workshop.reset(); workshop && workshop.setEnabled(true); } } }, 300);
     return;
   }
-  setTimeout(() => openPanel(id), workshop ? 550 : 0);
+  if (PANELS[id]) openPanel(id); else { workshop && workshop.setEnabled(true); }
+}
+
+// ─────────────────────────────────────────────────────────────
+//  Scale bar + zoom overlay
+// ─────────────────────────────────────────────────────────────
+const HINTS = {
+  workshop: "Scroll to zoom in ↓ · click <b>SD-01</b> to say hi",
+  circuit: "Click the <b>chip</b> or <b>magnifier</b> · scroll to go smaller",
+  cell: "Click the <b>nucleus</b> · scroll to go smaller",
+  nano: "Click a <b>molecule</b> · scroll up to zoom back out"
+};
+function buildScalebar(levels) {
+  $("#scalebar").innerHTML = levels.map((l, i) => `<button data-level="${i}" aria-label="${l.scale}: ${l.title}"><span class="sb-tick"></span><span class="sb-text"><b>${l.scale}</b><small>${l.title}</small></span></button>`).join("");
+  $("#scalebar").onclick = e => { const b = e.target.closest("[data-level]"); if (!b || !workshop) return; closePanelQuiet(); workshop.setEnabled(true); workshop.goTo(+b.dataset.level); };
+}
+function onLevel(L, phase) {
+  const fx = $("#zoomfx");
+  if (phase === "out") { fx.style.setProperty("--fx", "#" + L.bg.toString(16).padStart(6, "0")); $("#zoomScale").textContent = L.scale; $("#zoomTitle").textContent = `${L.title} · ${L.sub}`; fx.classList.add("show"); }
+  if (phase === "in") setTimeout(() => fx.classList.remove("show"), 250);
+  if (phase === "done" || phase === "in") {
+    document.querySelectorAll("#scalebar [data-level]").forEach(b => b.classList.toggle("active", +b.dataset.level === L.index));
+    document.body.dataset.level = L.key;
+    $("#hint").innerHTML = HINTS[L.key];
+    $("#levelTag").innerHTML = `<b>${L.scale}</b> ${L.title}`;
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -358,7 +407,7 @@ function toast(t) { toastEl.textContent = t; toastEl.classList.add("show"); clea
 //  Boot sequence + 3D init
 // ─────────────────────────────────────────────────────────────
 const bootEl = $("#boot");
-const BOOT = ["> powering on workshop…", "> calibrating servos ........ ok", "> loading SD-01 personality ... ok", "> lights on."];
+const BOOT = ["> powering on workshop…", "> calibrating zoom lens: 1 m → 1 nm ... ok", "> loading SD-01 personality ... ok", "> lights on."];
 let bootDone = false;
 function endBoot() { if (bootDone) return; bootDone = true; bootEl.classList.add("done"); setTimeout(() => bootEl.remove(), 700); setTimeout(() => speak("hi! click me."), 900); }
 $("#bootSkip").onclick = endBoot;
@@ -380,8 +429,9 @@ async function boot3D() {
     })();
   }
   try {
-    const { createWorkshop } = await import("./scene.js");
-    workshop = createWorkshop($("#scene"), { onSelect: select, onHover, onReady: () => { ready = true; } });
+    const { createWorld } = await import("./scene.js");
+    workshop = createWorld($("#scene"), { onSelect: select, onHover, onLevel, onReady: () => { ready = true; } });
+    buildScalebar(workshop.levels);
     if (document.body.classList.contains("std-mode")) workshop.pause();
   } catch (err) {
     console.error(err); endBoot(); showStandard(true);
