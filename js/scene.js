@@ -1,15 +1,12 @@
 // ─────────────────────────────────────────────────────────────
-//  "Scales" engine: four levels (1 m → 1 mm → 1 µm → 1 nm),
-//  zoom transitions between them, hover/click picking, camera focus.
+//  Ship engine: hyperspace intro → exterior → board → interior rooms.
+//  "Stops" for the room bar: 0 = exterior, 1..4 = ship rooms.
 // ─────────────────────────────────────────────────────────────
 import { THREE } from "./three/lib.js";
-import { buildWorkshop } from "./three/workshop.js";
-import { buildCircuit } from "./three/circuit.js";
-import { buildCell } from "./three/cell.js";
-import { buildNano } from "./three/nano.js";
+import { buildSpace } from "./three/space.js";
+import { buildShip } from "./three/ship.js";
 
-const BUILDERS = [buildWorkshop, buildCircuit, buildCell, buildNano];
-const BASE_FOV = 34;
+const BASE_FOV = 38;
 
 export function createWorld(container, { onSelect, onHover, onReady, onLevel } = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
@@ -20,148 +17,137 @@ export function createWorld(container, { onSelect, onHover, onReady, onLevel } =
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.Fog(0xffffff, 18, 34);
-  const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.05, 120);
+  scene.fog = new THREE.Fog(0x000000, 200, 400);
+  const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.05, 400);
 
-  // ── build levels ──
-  const levels = BUILDERS.map((build, index) => {
+  const makeWorld = (build) => {
     const root = new THREE.Group(); root.visible = false; scene.add(root);
     const interactables = [];
     const register = (group, id, label, focus) => {
       group.traverse(o => { if (o.isMesh && o.material && !Array.isArray(o.material)) { o.material = o.material.clone(); o.userData.baseEmissive = o.material.emissive ? o.material.emissive.clone() : null; o.userData.baseEI = o.material.emissiveIntensity; } });
-      group.userData.interactive = { id, label, focus };
-      interactables.push(group); return group;
+      group.userData.interactive = { id, label, focus }; interactables.push(group); return group;
     };
-    const L = build({ root, register });
-    Object.assign(L, { index, root, interactables });
-    L.home.pos = new THREE.Vector3(...L.home.pos); L.home.target = new THREE.Vector3(...L.home.target); L.portal = new THREE.Vector3(...L.portal);
-    return L;
-  });
+    return { root, interactables, ...build({ root, register }) };
+  };
+  const space = makeWorld(buildSpace);
+  const ship = makeWorld(buildShip);
+  space.home.pos = new THREE.Vector3(...space.home.pos); space.home.target = new THREE.Vector3(...space.home.target);
 
-  let cur = 0;
-  function applyLevel(L) {
-    levels.forEach(l => (l.root.visible = l === L));
-    scene.background = new THREE.Color(L.bg); scene.fog.color.setHex(L.bg); scene.fog.near = L.fog[0]; scene.fog.far = L.fog[1];
-    renderer.toneMappingExposure = L.exposure || 1;
+  const STOPS = [
+    { key: "space", index: 0, title: "Exterior", sub: "deep space", bg: 0x0b0e1a, home: space.home },
+    ...ship.rooms.map(r => ({ key: r.key, index: r.index + 1, title: r.title, sub: r.sub, bg: 0x10131f, home: r.home }))
+  ];
+  let stop = 0;
+  const inShip = () => stop > 0;
+  function applyWorld(isShip) {
+    space.root.visible = !isShip; ship.root.visible = isShip;
+    const bg = isShip ? 0x10131f : 0x0b0e1a;
+    scene.background = new THREE.Color(bg); scene.fog.color.setHex(bg);
+    scene.fog.near = isShip ? 14 : 200; scene.fog.far = isShip ? 32 : 400;
+    renderer.toneMappingExposure = isShip ? 1.15 : 1.05;
   }
-  applyLevel(levels[0]);
+  applyWorld(false);
 
-  // ── camera state ──
-  const camTarget = levels[0].home.target.clone();
-  camera.position.copy(levels[0].home.pos);
-  const tween = { active: false, t: 0, dur: 1, fromPos: new THREE.Vector3(), toPos: new THREE.Vector3(), fromTgt: new THREE.Vector3(), toTgt: new THREE.Vector3(), fromFov: BASE_FOV, toFov: BASE_FOV, ease: null, done: null };
+  // ── camera ──
+  const camTarget = space.home.target.clone();
+  camera.position.copy(space.home.pos);
+  const tween = { active: false };
   const easeInOut = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-  const easeIn = t => t * t * t;
-  const easeOut = t => 1 - Math.pow(1 - t, 3);
+  const easeIn = t => t * t * t, easeOut = t => 1 - Math.pow(1 - t, 3);
   function fly(pos, tgt, { dur = 1.1, fov = BASE_FOV, ease = easeInOut } = {}) {
-    return new Promise(res => {
-      Object.assign(tween, { active: true, t: 0, dur, ease, done: res, fromFov: camera.fov, toFov: fov });
-      tween.fromPos.copy(camera.position); tween.fromTgt.copy(camTarget); tween.toPos.copy(pos); tween.toTgt.copy(tgt);
-    });
+    return new Promise(res => Object.assign(tween, { active: true, t: 0, dur, ease, done: res, fromFov: camera.fov, toFov: fov, fromPos: camera.position.clone(), toPos: pos.clone(), fromTgt: camTarget.clone(), toTgt: tgt.clone() }));
   }
-  function fitHome(L = levels[cur]) {
-    const p = L.home.pos.clone(), a = camera.aspect;
-    if (a < 1.6) p.sub(L.home.target).multiplyScalar(1 + (1.6 - a) * 0.6).add(L.home.target);
+  function fitHome(s = STOPS[stop]) {
+    const p = s.home.pos.clone(), a = camera.aspect;
+    if (a < 1.6) p.sub(s.home.target).multiplyScalar(1 + (1.6 - a) * 0.75).add(s.home.target);
     return p;
   }
 
-  // ── level transitions ──
-  let transitioning = false, focused = null, enabled = true;
+  let transitioning = false, focused = null, enabled = false;
   async function goTo(i) {
-    i = Math.max(0, Math.min(levels.length - 1, i));
-    if (i === cur || transitioning) return;
+    i = Math.max(0, Math.min(STOPS.length - 1, i));
+    if (transitioning) return;
+    if (i === stop) { if (focused) { focused = null; await fly(fitHome(), STOPS[stop].home.target); } return; }
     transitioning = true; focused = null; setHover(null);
-    const from = levels[cur], to = levels[i], deeper = i > cur;
-    onLevel && onLevel(to, "out", deeper);
-    if (deeper) {
-      // dive into this level's portal
-      const dir = camera.position.clone().sub(from.portal).normalize();
-      await fly(from.portal.clone().addScaledVector(dir, 0.25), from.portal, { dur: 1.0, fov: 12, ease: easeIn });
+    const to = STOPS[i];
+    if (!inShip() && i > 0) {
+      // board: dive into the hatch
+      onLevel && onLevel(to, "out");
+      const portal = space.shipGroup.localToWorld(new THREE.Vector3(...space.portal));
+      await fly(portal.clone().add(new THREE.Vector3(0.6, 0.4, 1.2)), portal, { dur: 1.1, fov: 14, ease: easeIn });
+      stop = i; applyWorld(true);
+      const home = fitHome(to);
+      camera.position.copy(home.clone().add(new THREE.Vector3(0, 0.6, 7))); camTarget.copy(to.home.target); camera.fov = 60; camera.updateProjectionMatrix();
+      onLevel && onLevel(to, "in");
+      await fly(home, to.home.target, { dur: 1.4, ease: easeOut });
+    } else if (inShip() && i === 0) {
+      // exit: pull out of the hull into space
+      onLevel && onLevel(to, "out");
+      await fly(camera.position.clone().add(new THREE.Vector3(0, 1.5, 9)), camTarget, { dur: 0.9, fov: 60, ease: easeIn });
+      stop = 0; applyWorld(false);
+      const portal = space.shipGroup.localToWorld(new THREE.Vector3(...space.portal));
+      camera.position.copy(portal.clone().add(new THREE.Vector3(0.4, 0.3, 0.9))); camTarget.copy(portal); camera.fov = 16; camera.updateProjectionMatrix();
+      onLevel && onLevel(to, "in");
+      await fly(fitHome(to), to.home.target, { dur: 1.5, ease: easeOut });
     } else {
-      const back = camera.position.clone().sub(camTarget).multiplyScalar(2.6).add(camTarget);
-      await fly(back, camTarget, { dur: 0.9, fov: 60, ease: easeIn });
+      // walk between rooms: lateral dolly
+      stop = i; onLevel && onLevel(to, "walk");
+      await fly(fitHome(to), to.home.target, { dur: 1.2 });
     }
-    cur = i; applyLevel(to);
-    const home = fitHome(to);
-    if (deeper) {
-      // arrive zoomed-in on the middle of the new level and pull back
-      camera.position.copy(home.clone().sub(to.home.target).multiplyScalar(0.12).add(to.home.target)); camTarget.copy(to.home.target); camera.fov = 75;
-    } else {
-      // arrive from inside the new level's portal and pull back out
-      const dir = home.clone().sub(to.portal).normalize();
-      camera.position.copy(to.portal.clone().addScaledVector(dir, 0.3)); camTarget.copy(to.portal); camera.fov = 14;
-    }
-    camera.updateProjectionMatrix();
-    onLevel && onLevel(to, "in", deeper);
-    await fly(home, to.home.target, { dur: 1.3, fov: BASE_FOV, ease: easeOut });
     transitioning = false;
-    onLevel && onLevel(to, "done", deeper);
+    onLevel && onLevel(to, "done");
   }
 
-  function findInteractable(id) {
-    const here = levels[cur].interactables.find(g => g.userData.interactive.id === id && g.userData.interactive.focus);
-    if (here) return { level: cur, g: here };
-    let best = null;
-    for (const L of levels) { const g = L.interactables.find(o => o.userData.interactive.id === id && o.userData.interactive.focus); if (g && (!best || Math.abs(L.index - cur) < Math.abs(best.level - cur))) best = { level: L.index, g }; }
-    return best;
-  }
+  const allInteractables = () => (inShip() ? ship.interactables : space.interactables);
   async function focus(id) {
-    const hit = findInteractable(id); if (!hit) return false;
-    if (hit.level !== cur) await goTo(hit.level);
-    focused = hit.g; const f = hit.g.userData.interactive.focus;
+    const r = ship.roomOf(id);
+    if (r < 0) return false;
+    if (stop !== r + 1) await goTo(r + 1);
+    const g = ship.interactables.find(o => o.userData.interactive.id === id && o.userData.interactive.focus);
+    if (!g) return false;
+    focused = g; const f = g.userData.interactive.focus;
     await fly(new THREE.Vector3(...f.pos), new THREE.Vector3(...f.target));
     return true;
   }
-  function reset() { focused = null; return fly(fitHome(), levels[cur].home.target); }
+  function reset() { focused = null; return fly(fitHome(), STOPS[stop].home.target); }
 
   // ── picking ──
-  const raycaster = new THREE.Raycaster();
-  const pointer = new THREE.Vector2(9, 9), pSmooth = new THREE.Vector2();
+  const raycaster = new THREE.Raycaster(), pointer = new THREE.Vector2(9, 9), pSmooth = new THREE.Vector2(), zero = new THREE.Vector2();
   const lookPoint = new THREE.Vector3();
   let hovered = null, lastClient = { x: 0, y: 0 };
   function pick() {
     if (Math.abs(pointer.x) > 2) return null;
     raycaster.setFromCamera(pointer, camera);
-    const hits = raycaster.intersectObjects(levels[cur].interactables, true);
-    for (const h of hits) { let o = h.object; while (o && !o.userData.interactive) o = o.parent; if (o) return o; }
+    for (const h of raycaster.intersectObjects(allInteractables(), true)) { let o = h.object; while (o && !o.userData.interactive) o = o.parent; if (o) return o; }
     return null;
   }
   function setHighlight(group, on) {
-    group.traverse(o => {
-      if (!o.isMesh || !o.userData.baseEmissive) return;
-      if (on) { o.material.emissive.setHex(0xd49aae); o.material.emissiveIntensity = 0.3; }
-      else { o.material.emissive.copy(o.userData.baseEmissive); o.material.emissiveIntensity = o.userData.baseEI; }
-    });
+    group.traverse(o => { if (!o.isMesh || !o.userData.baseEmissive) return;
+      if (on) { o.material.emissive.setHex(0xd49aae); o.material.emissiveIntensity = Math.max(0.3, o.userData.baseEI || 0); }
+      else { o.material.emissive.copy(o.userData.baseEmissive); o.material.emissiveIntensity = o.userData.baseEI; } });
   }
+  const el = renderer.domElement;
   function setHover(g) {
     if (g === hovered) { if (g && onHover) onHover(g.userData.interactive, lastClient); return; }
     if (hovered) setHighlight(hovered, false);
-    hovered = g; if (g) setHighlight(g, true);
+    hovered = g; if (g && g.userData.interactive.id !== "deco-saber") setHighlight(g, true);
     el.style.cursor = g ? "pointer" : "default";
     onHover && onHover(g ? g.userData.interactive : null, lastClient);
   }
-
-  const el = renderer.domElement;
   const setPointer = e => { const r = el.getBoundingClientRect(); pointer.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); lastClient = { x: e.clientX, y: e.clientY }; };
   el.addEventListener("pointermove", setPointer);
   el.addEventListener("pointerleave", () => pointer.set(9, 9));
   el.addEventListener("click", e => {
+    if (!space.introDone) { space.skipIntro(); return; }
     if (!enabled || transitioning) return; setPointer(e);
     const g = pick(); if (!g) return;
     const { id } = g.userData.interactive;
-    if (id === "dive") { goTo(cur + 1); return; }
-    if (id === "about") levels[cur].droid && levels[cur].droid.hop();
+    if (id === "board") { goTo(2); return; }
+    if (id === "about") ship.droid.hop();
     onSelect && onSelect(id);
   });
-  // scroll / swipe to change scale
-  let wheelAcc = 0, wheelLock = 0;
-  el.addEventListener("wheel", e => {
-    e.preventDefault(); if (!enabled || transitioning || performance.now() < wheelLock) return;
-    wheelAcc += e.deltaY; if (Math.abs(wheelAcc) > 90) { const d = Math.sign(wheelAcc); wheelAcc = 0; wheelLock = performance.now() + 900; goTo(cur + d); }
-  }, { passive: false });
-  let touchY = null;
-  el.addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
-  el.addEventListener("touchend", e => { if (touchY == null || !enabled || transitioning) return; const dy = touchY - e.changedTouches[0].clientY; if (Math.abs(dy) > 70) goTo(cur + Math.sign(dy)); touchY = null; }, { passive: true });
+  // arrow keys walk between stops
+  window.addEventListener("keydown", e => { if (!enabled || transitioning || document.body.classList.contains("panel-open")) return; if (e.key === "ArrowRight") goTo(stop + 1); if (e.key === "ArrowLeft") goTo(stop - 1); });
 
   function resize() {
     const w = container.clientWidth, h = container.clientHeight;
@@ -173,10 +159,10 @@ export function createWorld(container, { onSelect, onHover, onReady, onLevel } =
   // ── loop ──
   const clock = new THREE.Clock();
   const state = { hovered: null, focused: null, lookPoint, pointer };
-  const zero = new THREE.Vector2();
+  let introNotified = false;
   function frame() {
     const dt = Math.min(clock.getDelta(), 0.05), t = clock.elapsedTime;
-    setHover(enabled && !tween.active && !transitioning ? pick() : null);
+    setHover(enabled && space.introDone && !tween.active && !transitioning ? pick() : null);
     pSmooth.lerp(Math.abs(pointer.x) > 2 ? zero : pointer, 0.04);
     if (tween.active) {
       tween.t = Math.min(1, tween.t + dt / tween.dur); const k = tween.ease(tween.t);
@@ -184,34 +170,36 @@ export function createWorld(container, { onSelect, onHover, onReady, onLevel } =
       camera.fov = tween.fromFov + (tween.toFov - tween.fromFov) * k; camera.updateProjectionMatrix();
       if (tween.t >= 1) { tween.active = false; tween.done && tween.done(); }
     } else if (!focused && !transitioning) {
-      const base = fitHome();
-      camera.position.x += (base.x + pSmooth.x * 0.7 - camera.position.x) * 0.06;
-      camera.position.y += (base.y + pSmooth.y * 0.35 - camera.position.y) * 0.06;
+      const base = fitHome(), amt = inShip() ? 0.45 : 0.9;
+      camera.position.x += (base.x + pSmooth.x * amt - camera.position.x) * 0.06;
+      camera.position.y += (base.y + pSmooth.y * amt * 0.5 - camera.position.y) * 0.06;
       camera.position.z += (base.z - camera.position.z) * 0.06;
     }
     camera.lookAt(camTarget);
     raycaster.setFromCamera(Math.abs(pointer.x) > 2 ? zero : pointer, camera);
-    lookPoint.copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 9);
+    lookPoint.copy(raycaster.ray.origin).addScaledVector(raycaster.ray.direction, 6);
     state.hovered = hovered; state.focused = focused;
-    levels[cur].update(t, dt, state);
+    (inShip() ? ship : space).update(t, dt, state);
+    if (!introNotified && space.introDone && enabled) { introNotified = true; onLevel && onLevel(STOPS[0], "intro-done"); }
     renderer.render(scene, camera);
   }
-  // compile every level once up front so the first dive doesn't hitch
-  levels.forEach(l => { applyLevel(l); renderer.compile(scene, camera); }); applyLevel(levels[0]);
+  // compile both worlds up front
+  applyWorld(true); renderer.compile(scene, camera); applyWorld(false); renderer.compile(scene, camera);
   renderer.setAnimationLoop(frame);
-  requestAnimationFrame(() => { onLevel && onLevel(levels[0], "done", true); onReady && onReady(); });
+  requestAnimationFrame(() => { onLevel && onLevel(STOPS[0], "done"); onReady && onReady(); });
 
   return {
-    levels: levels.map(l => ({ key: l.key, scale: l.scale, title: l.title, sub: l.sub })),
-    get level() { return cur; },
+    levels: STOPS.map(s => ({ key: s.key, title: s.title, sub: s.sub })),
+    get level() { return stop; },
     goTo, focus, reset,
-    levelOf(id) { const h = findInteractable(id); return h ? h.level : -1; },
+    levelOf(id) { const r = ship.roomOf(id); return r < 0 ? -1 : r + 1; },
+    startIntro() { enabled = true; introNotified = false; space.startIntro(); },
     setEnabled(v) { enabled = v; if (!v) setHover(null); },
     pause() { renderer.setAnimationLoop(null); },
     resume() { clock.getDelta(); renderer.setAnimationLoop(frame); },
     droidScreenPos() {
-      const d = levels[cur].droid; if (!d) return { x: -999, y: -999 };
-      const v = new THREE.Vector3(); d.head.getWorldPosition(v); v.y += 0.35 * d.group.scale.y; v.project(camera);
+      if (!inShip()) return { x: -999, y: -999 };
+      const d = ship.droid, v = new THREE.Vector3(); d.head.getWorldPosition(v); v.y += 0.35 * d.group.scale.y; v.project(camera);
       const r = el.getBoundingClientRect(); return { x: r.left + (v.x + 1) / 2 * r.width, y: r.top + (1 - v.y) / 2 * r.height };
     }
   };

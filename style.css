@@ -440,11 +440,9 @@ body.panel-open #scalebar, body.panel-open #levelTag, body.std-mode #scalebar, b
 #zoomfx span { font-family: var(--mono); font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.85); }
 
 /* HUD text on the dark levels */
-body[data-level="circuit"] .hud-name h1, body[data-level="nano"] .hud-name h1 { color: #e3e8f4; }
-body[data-level="circuit"] .hud-name p, body[data-level="nano"] .hud-name p,
-body[data-level="circuit"] .hud-hint, body[data-level="nano"] .hud-hint,
-body[data-level="circuit"] #levelTag, body[data-level="nano"] #levelTag { color: #b7c1da; text-shadow: none; }
-body[data-level="circuit"] .hud-hint b, body[data-level="nano"] .hud-hint b, body[data-level="circuit"] #levelTag b, body[data-level="nano"] #levelTag b { color: #e3a9bd; }
+body[data-level] .hud-name h1 { color: #e3e8f4; }
+body[data-level] .hud-name p, body[data-level] .hud-hint, body[data-level] #levelTag { color: #b7c1da; text-shadow: none; }
+body[data-level] .hud-hint b, body[data-level] #levelTag b { color: #e3a9bd; }
 .hud-name h1, .hud-name p, .hud-hint, #levelTag { transition: color .6s ease; }
 
 .next-box { margin-top: 18px; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: rgba(255,255,255,.55); }
@@ -452,3 +450,12 @@ body[data-level="circuit"] .hud-hint b, body[data-level="nano"] .hud-hint b, bod
 .next-box p { padding: 16px; margin: 0; }
 
 @media (max-width: 760px) { #scalebar, #levelTag { display: none; } }
+
+/* ship theme: HUD hidden during the hyperspace intro */
+body:not(.intro-done) .hud-bottom, body:not(.intro-done) #scalebar, body:not(.intro-done) #levelTag { opacity: 0; pointer-events: none; }
+#zoomfx b { font-size: clamp(48px, 8vw, 110px); }
+#scalebar { background: rgba(20, 24, 40, .55); border-color: rgba(255,255,255,.08); }
+#scalebar button:hover { background: rgba(255,255,255,.06); }
+.sb-text b { color: #e3e8f4; } .sb-text small { color: #9aa6c4; } .sb-tick { border-color: #9aa6c4; }
+#scalebar button.active .sb-text b { color: #e3a9bd; }
+#scalebar button:not(:last-child)::after { background: rgba(255,255,255,.12); }
