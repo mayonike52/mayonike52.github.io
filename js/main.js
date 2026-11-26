@@ -376,6 +376,7 @@ function onLevel(L, phase) {
   if (phase === "out") { fx.style.setProperty("--fx", "#" + L.bg.toString(16).padStart(6, "0")); $("#zoomScale").textContent = L.index === 0 ? "Exterior" : "Boarding"; $("#zoomTitle").textContent = L.index === 0 ? "back to deep space" : "welcome aboard"; fx.classList.add("show"); }
   if (phase === "in") setTimeout(() => fx.classList.remove("show"), 250);
   if (phase === "intro-done") { document.body.classList.add("intro-done"); }
+  if (phase === "flash") { const f = $("#hyperflash"); f.classList.remove("go"); void f.offsetWidth; f.classList.add("go"); return; }
   if (["done", "in", "walk", "intro-done"].includes(phase)) {
     document.querySelectorAll("#scalebar [data-level]").forEach(b => b.classList.toggle("active", +b.dataset.level === L.index));
     document.body.dataset.level = L.key;

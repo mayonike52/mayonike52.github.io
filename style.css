@@ -459,3 +459,11 @@ body:not(.intro-done) .hud-bottom, body:not(.intro-done) #scalebar, body:not(.in
 .sb-text b { color: #e3e8f4; } .sb-text small { color: #9aa6c4; } .sb-tick { border-color: #9aa6c4; }
 #scalebar button.active .sb-text b { color: #e3a9bd; }
 #scalebar button:not(:last-child)::after { background: rgba(255,255,255,.12); }
+
+/* exterior: nothing but the ship, the stars and your name */
+body[data-level="space"] #scalebar, body[data-level="space"] #levelTag, body[data-level="space"] .quicknav { opacity: 0 !important; pointer-events: none !important; }
+body[data-level="space"] .hud-hint { letter-spacing: .3em; color: rgba(255,255,255,.55); }
+body[data-level="space"] .hud-hint b { color: #fff; }
+#hyperflash { position: fixed; inset: 0; z-index: 25; pointer-events: none; background: radial-gradient(circle at 50% 50%, rgba(235,242,255,.95), rgba(180,200,255,.5) 40%, transparent 75%); opacity: 0; }
+#hyperflash.go { animation: hyperflash .7s ease-out; }
+@keyframes hyperflash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }

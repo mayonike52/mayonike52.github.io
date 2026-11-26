@@ -27,21 +27,23 @@ export function createWorld(container, { onSelect, onHover, onReady, onLevel } =
       group.traverse(o => { if (o.isMesh && o.material && !Array.isArray(o.material)) { o.material = o.material.clone(); o.userData.baseEmissive = o.material.emissive ? o.material.emissive.clone() : null; o.userData.baseEI = o.material.emissiveIntensity; } });
       group.userData.interactive = { id, label, focus }; interactables.push(group); return group;
     };
-    return { root, interactables, ...build({ root, register }) };
+    const w = build({ root, register }); w.root = root; w.interactables = interactables; return w;
   };
   const space = makeWorld(buildSpace);
   const ship = makeWorld(buildShip);
+  space.onFlash = () => onLevel && onLevel(STOPS_FLASH, "flash");
+  const STOPS_FLASH = { key: "space", index: 0 };
   space.home.pos = new THREE.Vector3(...space.home.pos); space.home.target = new THREE.Vector3(...space.home.target);
 
   const STOPS = [
-    { key: "space", index: 0, title: "Exterior", sub: "deep space", bg: 0x0b0e1a, home: space.home },
+    { key: "space", index: 0, title: "Exterior", sub: "deep space", bg: 0x000000, home: space.home },
     ...ship.rooms.map(r => ({ key: r.key, index: r.index + 1, title: r.title, sub: r.sub, bg: 0x10131f, home: r.home }))
   ];
   let stop = 0;
   const inShip = () => stop > 0;
   function applyWorld(isShip) {
     space.root.visible = !isShip; ship.root.visible = isShip;
-    const bg = isShip ? 0x10131f : 0x0b0e1a;
+    const bg = isShip ? 0x10131f : 0x000000;
     scene.background = new THREE.Color(bg); scene.fog.color.setHex(bg);
     scene.fog.near = isShip ? 14 : 200; scene.fog.far = isShip ? 32 : 400;
     renderer.toneMappingExposure = isShip ? 1.15 : 1.05;

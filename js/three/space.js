@@ -1,4 +1,4 @@
-// EXTERIOR — hyperspace drop-out, the ship, and a few quiet easter eggs.
+// EXTERIOR — a classic black starfield and the ship dropping out of hyperspace.
 import { THREE, P, mat, shadow, box, cyl, sph, at, canvasTex, glow, dotTex } from "./lib.js";
 
 export function buildSpace({ root, register }) {
@@ -6,51 +6,24 @@ export function buildSpace({ root, register }) {
   const sun = new THREE.DirectionalLight(0xffeef2, 2.2); sun.position.set(-8, 5, 6); root.add(sun);
   const rimL = new THREE.DirectionalLight(0x9fb2e6, 1.2); rimL.position.set(8, -2, -6); root.add(rimL);
 
-  // starfield (static points) + streaks for the hyperspace intro
-  const N = 1400, sp = new Float32Array(N * 3);
-  for (let i = 0; i < N; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(80 + Math.random() * 40); sp.set([v.x, v.y, v.z], i * 3); }
-  const sg = new THREE.BufferGeometry(); sg.setAttribute("position", new THREE.BufferAttribute(sp, 3));
-  const stars = new THREE.Points(sg, new THREE.PointsMaterial({ color: 0xdfe6f5, size: 0.5, map: dotTex(), transparent: true, depthWrite: false, sizeAttenuation: true }));
-  root.add(stars);
-
-  const S = 600, streakPos = new Float32Array(S * 6), seeds = [];
-  for (let i = 0; i < S; i++) { const a = Math.random() * Math.PI * 2, r = 3 + Math.random() * 30; seeds.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, z: -Math.random() * 160 }); }
-  const streakGeo = new THREE.BufferGeometry(); streakGeo.setAttribute("position", new THREE.BufferAttribute(streakPos, 3));
-  const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ color: 0xc9d8ff, transparent: true, opacity: 0.9 }));
-  root.add(streaks);
-
-  // nebula sprites
-  for (const [x, y, z, s, c] of [[-40, 18, -70, 60, 0xb5627f], [45, -12, -80, 70, 0x5670a8], [10, 30, -90, 50, 0x8a6aa0]]) {
-    const n = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: c, transparent: true, opacity: 0.22, depthWrite: false, blending: THREE.AdditiveBlending }));
-    n.position.set(x, y, z); n.scale.setScalar(s); root.add(n);
+  // classic starfield: pure black, crisp white dots in three brightness layers
+  const starTex = (() => { const c = document.createElement("canvas"); c.width = c.height = 32; const g = c.getContext("2d"); const r = g.createRadialGradient(16, 16, 0, 16, 16, 16); r.addColorStop(0, "rgba(255,255,255,1)"); r.addColorStop(0.25, "rgba(255,255,255,.9)"); r.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = r; g.fillRect(0, 0, 32, 32); return new THREE.CanvasTexture(c); })();
+  const starLayers = [];
+  for (const [n, size, op] of [[2600, 0.35, 0.75], [700, 0.6, 0.95], [90, 1.1, 1]]) {
+    const pos = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const v = new THREE.Vector3().randomDirection().multiplyScalar(90 + Math.random() * 30); pos.set([v.x, v.y, v.z], i * 3); }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    const pts = new THREE.Points(g, new THREE.PointsMaterial({ color: 0xffffff, size, map: starTex, transparent: true, opacity: op, depthWrite: false, fog: false }));
+    pts.userData.op = op; root.add(pts); starLayers.push(pts);
   }
+  const stars = { material: { set opacity(v) { starLayers.forEach(l => (l.material.opacity = l.userData.op * v)); } } };
 
-  // planet + ring
-  const planetTex = canvasTex(512, 256, (g, w, h) => {
-    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, "#5a6d9c"); gr.addColorStop(0.5, "#9a7a9e"); gr.addColorStop(1, "#c98ea3"); g.fillStyle = gr; g.fillRect(0, 0, w, h);
-    for (let i = 0; i < 26; i++) { g.fillStyle = `rgba(${Math.random() < 0.5 ? "238,210,220" : "60,70,110"},${0.08 + Math.random() * 0.15})`; g.fillRect(0, Math.random() * h, w, 2 + Math.random() * 10); }
-  });
-  const planet = at(root, new THREE.Mesh(new THREE.SphereGeometry(16, 64, 40), new THREE.MeshStandardMaterial({ map: planetTex, roughness: 0.9 })), 26, -16, -55);
-  planet.rotation.z = 0.25;
-  const ring = at(root, new THREE.Mesh(new THREE.RingGeometry(20, 28, 96), new THREE.MeshBasicMaterial({ color: 0xd9c3d6, transparent: true, opacity: 0.25, side: THREE.DoubleSide })), 26, -16, -55);
-  ring.rotation.set(1.2, 0.2, 0.3);
-  // twin suns, far away (quiet nod)
-  for (const [x, s] of [[-60, 9], [-52, 6]]) { const g = new THREE.Sprite(new THREE.SpriteMaterial({ map: dotTex(), color: 0xffe2c8, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending })); g.position.set(x, 26, -95); g.scale.setScalar(s); root.add(g); }
-
-  // "that's no moon" — tiny grey sphere with a trench and a dish, very far off
-  const moon = new THREE.Group(); moon.position.set(-24, 12, -60); root.add(moon);
-  at(moon, sph(2.2, mat(0x8a90a0, { roughness: 0.8 }), undefined, 48, 32));
-  at(moon, new THREE.Mesh(new THREE.TorusGeometry(2.2, 0.06, 6, 64), mat(0x4a5064)), 0, 0, 0).rotation.x = Math.PI / 2;
-  const dish = at(moon, new THREE.Mesh(new THREE.SphereGeometry(0.55, 24, 12, 0, Math.PI * 2, 0, 0.9), mat(0x5d6478, { side: THREE.DoubleSide })), 0.9, 0.9, 1.75);
-  dish.lookAt(new THREE.Vector3(3, 3, 9));
-  register(moon, "egg-moon", "…that's no moon", null);
-
-  // asteroid cluster (quiet nod #2)
-  const rocks = new THREE.Group(); rocks.position.set(-20, -10, -34); rocks.scale.setScalar(0.8); root.add(rocks);
-  const rockM = mat(0x6c6478, { flatShading: true, roughness: 0.95 });
-  const rockList = [];
-  for (let i = 0; i < 14; i++) { const r = at(rocks, new THREE.Mesh(new THREE.DodecahedronGeometry(0.3 + Math.random() * 0.9, 0), rockM), (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 4, (Math.random() - 0.5) * 6); r.rotation.set(Math.random() * 3, Math.random() * 3, 0); rockList.push(r); }
-  register(rocks, "egg-rocks", "Asteroid field (don't tell me the odds)", null);
+  // hyperspace streaks (only during the arrival)
+  const S = 700, streakPos = new Float32Array(S * 6), seeds = [];
+  for (let i = 0; i < S; i++) { const a = Math.random() * Math.PI * 2, r = 2.5 + Math.random() * 34; seeds.push({ x: Math.cos(a) * r, y: Math.sin(a) * r, z: -Math.random() * 170 }); }
+  const streakGeo = new THREE.BufferGeometry(); streakGeo.setAttribute("position", new THREE.BufferAttribute(streakPos, 3));
+  const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ color: 0xeef3ff, transparent: true, opacity: 0.9, fog: false }));
+  root.add(streaks);
 
   // ── the ship: an original light freighter ──
   const ship = new THREE.Group(); root.add(ship);
@@ -91,9 +64,11 @@ export function buildSpace({ root, register }) {
   register(ship, "board", "Board the ship →", null);
   ship.rotation.set(0.32, -0.6, 0.06);
 
-  // intro state
-  let introT = -1, introDur = 3.2;
+  // arrival: in hyperspace (streaks) → flash → ship snaps out of its stretch and coasts in
+  const IN_HYPER = 1.9, SNAP = 0.55, COAST = 1.6;
+  let introT = -1, introDur = IN_HYPER + SNAP + COAST, flashed = false, onFlash = null;
   const ease = t => 1 - Math.pow(1 - t, 3);
+  const heading = new THREE.Vector3();
   function setStreaks(len, speed, dt, alpha) {
     const a = streakGeo.attributes.position.array;
     seeds.forEach((s, i) => {
@@ -104,30 +79,50 @@ export function buildSpace({ root, register }) {
   }
   setStreaks(0, 0, 0, 0);
 
+  const rest = new THREE.Vector3(0, 0, 0);
   return {
     key: "space", title: "Deep space", sub: "the ship",
-    bg: 0x0b0e1a, fog: [200, 400], exposure: 1.05,
+    bg: 0x000000, fog: [200, 400], exposure: 1.05,
     home: { pos: [0, 2.6, 14], target: [0, 0.2, 0] },
     portal: [0.2, -0.5, 0.8],
     shipGroup: ship,
-    startIntro() { introT = 0; },
-    skipIntro() { introT = introDur; },
+    set onFlash(fn) { onFlash = fn; },
+    startIntro() { introT = 0; flashed = false; ship.visible = false; },
+    skipIntro() { introT = introDur; ship.visible = true; ship.scale.set(1, 1, 1); },
     get introDone() { return introT < 0 || introT >= introDur; },
     update(t, dt, s) {
+      heading.set(1, 0, 0).applyQuaternion(ship.quaternion);
       if (introT >= 0 && introT < introDur) {
-        introT += dt; const k = Math.min(1, introT / introDur);
-        const slow = ease(Math.min(1, k * 1.3));
-        setStreaks(40 * (1 - slow) + 0.1, 220 * (1 - slow) + 4, dt, 1 - slow);
-        stars.material.opacity = slow;
-        ship.position.z = -40 * (1 - ease(k)); ship.position.x = 6 * (1 - ease(k));
-      } else { if (streaks.visible) setStreaks(0, 0, 0, 0); stars.material.opacity = 1; ship.position.set(0, Math.sin(t * 0.6) * 0.08, 0); }
+        introT += dt;
+        if (introT < IN_HYPER) {
+          // still in hyperspace: tunnel of streaks, no stars, no ship
+          const k = introT / IN_HYPER;
+          setStreaks(26 + 10 * Math.sin(k * 3), 230, dt, Math.min(1, k * 3));
+          stars.material.opacity = 0; ship.visible = false;
+        } else if (introT < IN_HYPER + SNAP) {
+          // drop out: streaks collapse into stars, ship un-stretches and decelerates hard
+          if (!flashed) { flashed = true; onFlash && onFlash(); }
+          const k = (introT - IN_HYPER) / SNAP, e = ease(k);
+          setStreaks(26 * (1 - e) + 0.05, 230 * (1 - e) + 2, dt, 1 - e);
+          stars.material.opacity = e;
+          ship.visible = true; ship.scale.set(1 + 14 * Math.pow(1 - e, 2), 1, 1);
+          ship.position.copy(rest).addScaledVector(heading, -26 * Math.pow(1 - e, 2) + 2.2);
+        } else {
+          // coast to a stop
+          const k = (introT - IN_HYPER - SNAP) / COAST, e = ease(k);
+          if (streaks.visible) setStreaks(0, 0, 0, 0);
+          stars.material.opacity = 1; ship.scale.set(1, 1, 1);
+          ship.position.copy(rest).addScaledVector(heading, 2.2 * (1 - e));
+        }
+      } else {
+        if (streaks.visible) setStreaks(0, 0, 0, 0); stars.material.opacity = 1; ship.visible = true; ship.scale.set(1, 1, 1);
+        ship.position.set(0, Math.sin(t * 0.6) * 0.06, 0);
+      }
       const hot = s.hovered === ship;
-      ship.rotation.y = -0.6 + Math.sin(t * 0.2) * 0.06; ship.rotation.z = 0.06 + Math.sin(t * 0.5) * 0.02;
+      ship.rotation.y = -0.6 + Math.sin(t * 0.2) * 0.04; ship.rotation.z = 0.06 + Math.sin(t * 0.5) * 0.015;
       engineGlows.forEach((g, i) => { if (g.isSprite) g.material.opacity = 0.6 + Math.sin(t * 9 + i) * 0.12; });
       nav.forEach((n, i) => (n.visible = Math.sin(t * 3 + i * Math.PI) > 0));
       ramp.material.opacity += ((hot ? 0.8 : 0.15 + Math.sin(t * 2) * 0.1) - ramp.material.opacity) * 0.1;
-      rockList.forEach((r, i) => { r.rotation.x += dt * 0.1 * ((i % 3) + 1); r.rotation.y += dt * 0.07; });
-      planet.rotation.y += dt * 0.01; moon.rotation.y += dt * 0.05;
     }
   };
 }
